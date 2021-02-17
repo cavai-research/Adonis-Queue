@@ -1,0 +1,5 @@
+import Queue from '@ioc:Cavai/Queue'
+
+Queue.use('payloadBuilder').process(async (job) => {
+  console.log('Asdasd')
+})

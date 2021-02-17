@@ -1,20 +1,27 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import Queue from '../src/Queue'
 
-export default class QueueServiceProvider {
+export default class QueueProvider {
+  public static needsApplication = true
+
   constructor(protected app: ApplicationContract) {}
-  // Not sure about that yet, moist most likely will need
-  // public static needsApplication = true
 
-  /**
-   * Register queue to the container
-   */
   public register() {
-    const config = this.app.config.get('queue', {})
-    this.app.container.singleton('@cavai/adonis-queue', () => {
-      const { Queue } = require('../src/Queue')
-      return new Queue(config)
+    // Register your own bindings
+    this.app.container.singleton('Cavai/Queue', () => {
+      return new Queue(this.app.container.use('Adonis/Core/Config').get('queue'), this.app)
     })
   }
 
-  public boot() {}
+  public async boot() {
+    // IoC container is ready
+  }
+
+  public async ready() {
+    // App is ready
+  }
+
+  public async shutdown() {
+    // Cleanup, since app is going down
+  }
 }
