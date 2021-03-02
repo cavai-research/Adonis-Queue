@@ -1,7 +1,8 @@
 import RedisQueue from './Drivers/RedisQueue'
 import MemoryQueue from './Drivers/MemoryQueue'
+import { QueueContract, ExtendCallback } from '@ioc:Cavai/Queue'
 
-export default class Queue {
+export default class Queue implements QueueContract {
   /**
    * Cache for extended drivers, to keep them in memory
    */
@@ -31,6 +32,10 @@ export default class Queue {
     this.mappingsCache[mappingName] = driverInstance
 
     return driverInstance
+  }
+
+  public extend(driverName: string, callBack: ExtendCallback) {
+    this.extendedDrivers[driverName] = callBack
   }
 
   /**
