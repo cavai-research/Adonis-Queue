@@ -7,7 +7,6 @@ export default class MemoryQueue implements DriverContract {
   private idCounter = 0
 
   constructor(private config, private app) {
-    console.log('Initialized memory queue')
     import(this.app.startPath('jobs'))
   }
 
