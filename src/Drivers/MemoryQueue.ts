@@ -1,7 +1,5 @@
 import { DriverContract, JobContract } from '@ioc:Cavai/Queue'
 
-const QUEUE_POLLING_DELAY = 200
-
 export default class MemoryQueue implements DriverContract {
   private queue = {}
   private idCounter = 0
@@ -41,7 +39,7 @@ export default class MemoryQueue implements DriverContract {
       }
       setTimeout(() => {
         work()
-      }, QUEUE_POLLING_DELAY)
+      }, this.config.config.pollingDelay || 200)
     }
     work()
   }

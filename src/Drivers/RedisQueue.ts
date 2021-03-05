@@ -4,12 +4,10 @@ import { DriverContract, JobContract } from '@ioc:Cavai/Queue'
 export default class RedisQueue implements DriverContract {
   private queue = new BeeQueue(this.config.name)
 
-  constructor(private config, private app) {
-    console.log('Initialized')
-  }
+  constructor(private config, private app) {}
 
-  public async add<T extends Record<string, any>>(params: T): Promise<JobContract<T>> {
-    const job = await this.queue.createJob<T>(params).save()
+  public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
+    const job = await this.queue.createJob<T>(payload).save()
     return {
       id: job.id,
       payload: job.data,
