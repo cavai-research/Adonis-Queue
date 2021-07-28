@@ -12,6 +12,7 @@ export default class RedisQueue implements DriverContract {
     return {
       id: job.id,
       payload: job.data,
+      progress: job.progress,
     }
   }
 
@@ -25,6 +26,7 @@ export default class RedisQueue implements DriverContract {
     return {
       id: job.id,
       payload: job.data,
+      progress: job.progress,
     }
   }
 }

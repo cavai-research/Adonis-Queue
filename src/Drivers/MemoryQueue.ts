@@ -18,6 +18,7 @@ export default class MemoryQueue implements DriverContract {
     const job = {
       payload,
       id: this.idCounter,
+      progress: 'done',
     }
     this.queue[this.idCounter] = job
     return job

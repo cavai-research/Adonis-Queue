@@ -9,6 +9,7 @@ declare module '@ioc:Cavai/Queue' {
   export interface JobContract<T extends Record<string, any>> {
     id: string | number
     payload: T
+    progress?: any
   }
 
   export interface DriverContract {
