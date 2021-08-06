@@ -32,7 +32,7 @@ export default class MemoryQueue implements DriverContract {
    * then starts polling queue for new ones
    *
    * @param cb Callback to execute. Callback is the job executor
-   * which receives queued job payload
+   * which receives queued job
    */
   public process(cb: (job: JobContract<any>) => void) {
     const work = () => {
