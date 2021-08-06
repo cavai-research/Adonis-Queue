@@ -13,11 +13,20 @@ export default class RedisQueue implements DriverContract {
       id: job.id,
       payload: job.data,
       progress: job.progress,
+      reportProgress: job.reportProgress,
     }
   }
 
   public process(cb) {
-    this.queue.process(cb)
+    const remappedCallback = (data) => {
+      cb({
+        id: data.id,
+        payload: data.data,
+        progress: data.progress,
+      })
+    }
+
+    this.queue.process(remappedCallback)
   }
 
   public async getJob(id: string | number): Promise<JobContract<any>> {
@@ -27,6 +36,7 @@ export default class RedisQueue implements DriverContract {
       id: job.id,
       payload: job.data,
       progress: job.progress,
+      reportProgress: job.reportProgress,
     }
   }
 }

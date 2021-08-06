@@ -10,11 +10,11 @@ declare module '@ioc:Cavai/Queue' {
     id: string | number
     payload: T
     progress?: any
+    reportProgress(progress: any): void
   }
 
   export interface DriverContract {
     add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>>
-    // This proccess has wrong typings
     process(callback: (job: JobContract<any>) => Promise<void>): void
     getJob(id: number | string): Promise<JobContract<any>>
   }
