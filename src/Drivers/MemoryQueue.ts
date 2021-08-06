@@ -18,7 +18,7 @@ export default class MemoryQueue implements DriverContract {
     const job = {
       payload,
       id: this.idCounter,
-      progress: 'done',
+      progress: 0,
     }
     this.queue[this.idCounter] = job
     return job
@@ -31,7 +31,7 @@ export default class MemoryQueue implements DriverContract {
    * @param cb Callback to execute. Callback is the job executor
    * which receives queued job payload
    */
-  public process(cb) {
+  public process(cb: (job: JobContract<any>) => void) {
     const work = () => {
       const nextJobId = Object.keys(this.queue)[0]
       if (nextJobId) {
