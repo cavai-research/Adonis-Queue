@@ -1,6 +1,9 @@
 export default {
-  payloadBuilder: {
+  exampleQueue: {
     name: 'example',
-    driver: 'redis',
+    driver: 'memory',
+    config: {
+      pollingDelay: 500,
+    },
   },
 }
