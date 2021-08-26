@@ -3,9 +3,21 @@ import { DriverContract, JobContract } from '@ioc:Cavai/Queue'
 export default class MemoryQueue implements DriverContract {
   private queue = {}
   private idCounter = 0
+  private booted = false
 
   constructor(private config, private app) {
-    import(this.app.startPath('jobs'))
+    this.boot()
+  }
+
+  /**
+   * Initializes memory queue
+   */
+  public async boot() {
+    if (this.booted) {
+      return
+    }
+    await import(this.app.startPath('jobs'))
+    this.booted = true
   }
 
   /**
