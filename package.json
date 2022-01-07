@@ -55,7 +55,10 @@
           "dest": "queue"
         }
       ]
-    }
+    },
+    "commands": [
+      "@cavai/queue/build/commands"
+    ]
   },
   "dependencies": {
     "bee-queue": "^1.4.0"
