@@ -6,4 +6,7 @@ export default {
       pollingDelay: 500,
     },
   },
+  redisQueue: {
+    name: 'redis
+  }
 }
