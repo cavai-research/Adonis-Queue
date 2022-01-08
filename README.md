@@ -65,7 +65,7 @@ Redis queue job processing is also ran as separate NodeJS instance, so any job c
 
 Downside of this queue is slightly harder setup, since it requires Redis to be installed and slightly higher resource consumption. There will be another instance of NodeJS and Redis also running, instead of just single NodeJS instance
 
-Default memory queue configuration:
+Default Redis queue configuration:
 
 ```ts
 export default {
@@ -118,9 +118,9 @@ Adding jobs to queue can be done everywhere in application. Just need to import 
 ```ts
 import Queue from '@ioc:Cavai/Queue'
 
-// Add job to exampleQueue
+// Add job to signupEmailQueue
 // With payload as our nice fake new user
-let stuff = Queue.use('exampleQueue').add({
+let job = Queue.use('signupEmailQueue').add({
   email: 'foo@bar.com',
   name: 'FooBar',
 })
@@ -128,4 +128,35 @@ let stuff = Queue.use('exampleQueue').add({
 
 ### Get job by it's ID
 
-### Report job progress
+```ts
+import Queue from '@ioc:Cavai/Queue'
+
+let job = await Queue.use('signupEmailQueue').getJob(10)
+```
+
+### Reporting job progress
+
+Job progress can be reported with `job.reportProgress(any)`
+
+```ts
+import Queue from '@ioc:Cavai/Queue'
+import Mail from '@ioc:Adonis/Addons/Mail'
+
+// Defining job in 'signupEmailQueue'
+Queue.use('signupEmailQueue').process(async (job) => {
+  // Report job progress
+  job.reportProgress('Sending mail')
+
+  // Send signup email
+  await Mail.send((message) => {
+    message
+      .from('info@example.com')
+      .to(job.payload.email)
+      .subject('Welcome Onboard!')
+      .htmlView('emails/welcome', { name: job.payload.name })
+    })
+  
+  // Report job progress
+  job.reportProgress('Mail sent')
+})
+```
