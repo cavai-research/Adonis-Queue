@@ -7,6 +7,6 @@ export default {
     },
   },
   redisQueue: {
-    name: 'redis
-  }
+    name: 'redis',
+  },
 }
