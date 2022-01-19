@@ -30,7 +30,7 @@ export default class RedisQueue implements DriverContract {
    */
   public process(cb) {
     const remappedCallback = (data) => {
-      cb({
+      return cb({
         id: data.id,
         payload: data.data,
         progress: data.progress,
