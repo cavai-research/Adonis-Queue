@@ -131,7 +131,7 @@ let job = Queue.use('signupEmailQueue').add({
 ```ts
 import Queue from '@ioc:Cavai/Queue'
 
-let job = await Queue.use('signupEmailQueue').getJob(10)
+let job = await Queue.use('signupEmailQueue').getJob(10) // where 10 is job ID
 ```
 
 ### Reporting job progress
@@ -160,3 +160,9 @@ Queue.use('signupEmailQueue').process(async (job) => {
   job.reportProgress('Mail sent')
 })
 ```
+
+### Start the queue
+
+To run queue just run `node ace queue:start`.
+
+> It's not needed when using only memory queue, since in-memory one will share NodeJS instance with main AdonisJS application
