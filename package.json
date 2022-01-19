@@ -7,26 +7,35 @@
     "lint": "eslint . --ext=.ts",
     "format": "prettier --write .",
     "pretest": "npm run lint",
-    "test": "node japaFile.js",
+    "test": "node .bin/test.js",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "copyfiles": "copyfiles \"templates/**/*.txt\" build",
-    "build": "npm run compile; npm run copyfiles",
-    "prepublishOnly": "npm run build"
+    "build": "npm run compile && npm run copyfiles",
+    "prepublishOnly": "npm run build",
+    "commit": "git-cz",
+    "release": "np --message=\"chore(release): %s\"",
+    "version": "npm run build",
+    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json Cavai/Adonis-Queue"
   },
   "devDependencies": {
     "@adonisjs/core": "^5.1.11",
-    "@adonisjs/mrm-preset": "^4.1.2",
+    "@adonisjs/mrm-preset": "^5.0.2",
     "@adonisjs/require-ts": "^2.0.7",
-    "@types/node": "^16.4.6",
+    "@types/node": "^17.0.6",
+    "commitizen": "^4.2.4",
     "copyfiles": "^2.4.1",
+    "cz-conventional-changelog": "^3.3.0",
     "del-cli": "^4.0.1",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^7.2.0",
-    "eslint-plugin-adonis": "^1.2.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "japa": "^3.1.1",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-adonis": "^2.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "github-label-sync": "^2.0.2",
+    "husky": "^7.0.4",
+    "japa": "^4.0.0",
     "mrm": "^3.0.5",
+    "np": "^7.6.0",
     "prettier": "^2.2.1",
     "typescript": "^4.3.5"
   },
@@ -35,7 +44,8 @@
   "files": [
     "build/src",
     "build/index.d.ts",
-    "build/index.js"
+    "build/index.js",
+    "build/templates"
   ],
   "adonisjs": {
     "types": "@cavai/queue",
@@ -55,9 +65,63 @@
           "dest": "queue"
         }
       ]
-    }
+    },
+    "commands": [
+      "@cavai/queue/build/commands"
+    ]
   },
   "dependencies": {
     "bee-queue": "^1.4.0"
+  },
+  "mrmConfig": {
+    "core": false,
+    "license": "MIT",
+    "services": [
+      "github-actions"
+    ],
+    "minNodeVersion": "14.15.4",
+    "probotApps": [
+      "stale"
+    ],
+    "runGhActionsOnWindows": true
+  },
+  "eslintConfig": {
+    "extends": [
+      "plugin:adonis/typescriptPackage",
+      "prettier"
+    ],
+    "plugins": [
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto"
+        }
+      ]
+    }
+  },
+  "eslintIgnore": [
+    "build"
+  ],
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": false,
+    "singleQuote": true,
+    "useTabs": false,
+    "quoteProps": "consistent",
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "printWidth": 100
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "np": {
+    "contents": ".",
+    "anyBranch": false
   }
 }
