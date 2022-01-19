@@ -47,10 +47,10 @@ export default class MemoryQueue implements DriverContract {
    * which receives queued job
    */
   public process(cb: (job: JobContract<any>) => void) {
-    const work = () => {
+    const work = async () => {
       const nextJobId = Object.keys(this.queue)[0]
       if (nextJobId) {
-        cb(this.queue[nextJobId])
+        await cb(this.queue[nextJobId])
         delete this.queue[nextJobId]
       }
       setTimeout(() => {
