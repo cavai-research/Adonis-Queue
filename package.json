@@ -11,7 +11,7 @@
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "copyfiles": "copyfiles \"templates/**/*.txt\" build",
-    "build": "npm run compile",
+    "build": "npm run compile && npm run copyfiles",
     "prepublishOnly": "npm run build",
     "commit": "git-cz",
     "release": "np --message=\"chore(release): %s\"",
@@ -44,7 +44,8 @@
   "files": [
     "build/src",
     "build/index.d.ts",
-    "build/index.js"
+    "build/index.js",
+    "build/templates"
   ],
   "adonisjs": {
     "types": "@cavai/queue",
