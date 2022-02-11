@@ -125,5 +125,15 @@
   "np": {
     "contents": ".",
     "anyBranch": false
-  }
+  },
+  "description": "> Basic AdonisJS queue provider",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cavai/Adonis-Queue.git"
+  },
+  "author": "cavai",
+  "bugs": {
+    "url": "https://github.com/Cavai/Adonis-Queue/issues"
+  },
+  "homepage": "https://github.com/Cavai/Adonis-Queue#readme"
 }
