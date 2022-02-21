@@ -51,7 +51,6 @@ export default class MemoryQueue implements DriverContract {
       if (this.queue[nextJobId] && this.queue[nextJobId].status !== 'done') {
         await cb(this.queue[nextJobId])
         this.queue[nextJobId].status === 'done'
-        // delete this.queue[nextJobId]
         nextJobId++
       }
       setTimeout(() => {
@@ -66,7 +65,7 @@ export default class MemoryQueue implements DriverContract {
    *
    * @param id Job ID
    */
-  public async getJob(id: string | number): Promise<JobContract<any>> {
-    return this.queue[id]
+  public async getJob(id: string | number): Promise<JobContract<any> | null> {
+    return this.queue[id] || null
   }
 }
