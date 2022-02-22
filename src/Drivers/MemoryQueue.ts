@@ -47,17 +47,17 @@ export default class MemoryQueue implements DriverContract {
    * which receives queued job
    */
   public process(cb: (job: JobContract<any>) => void) {
-    const work = async () => {
-      const nextJobId = Object.keys(this.queue)[0]
-      if (nextJobId) {
+    const work = async (nextJobId) => {
+      if (this.queue[nextJobId] && this.queue[nextJobId].status !== 'done') {
         await cb(this.queue[nextJobId])
-        delete this.queue[nextJobId]
+        this.queue[nextJobId].status === 'done'
+        nextJobId++
       }
       setTimeout(() => {
-        work()
+        work(nextJobId++)
       }, this.config.config.pollingDelay || 200)
     }
-    work()
+    work(1)
   }
 
   /**
@@ -65,7 +65,7 @@ export default class MemoryQueue implements DriverContract {
    *
    * @param id Job ID
    */
-  public async getJob(id: string | number): Promise<JobContract<any>> {
-    return this.queue[id]
+  public async getJob(id: string | number): Promise<JobContract<any> | null> {
+    return this.queue[id] || null
   }
 }

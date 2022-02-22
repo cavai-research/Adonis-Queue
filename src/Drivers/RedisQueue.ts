@@ -45,8 +45,11 @@ export default class RedisQueue implements DriverContract {
    *
    * @param id Job ID
    */
-  public async getJob(id: string | number): Promise<JobContract<any>> {
+  public async getJob(id: string | number): Promise<JobContract<any> | null> {
     const job = await this.queue.getJob(String(id))
+    if (!job) {
+      return null
+    }
 
     return {
       id: job.id,
