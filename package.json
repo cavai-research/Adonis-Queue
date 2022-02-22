@@ -1,6 +1,6 @@
 {
   "name": "@cavai/queue",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./build/providers/QueueProvider.js",
   "files": [
     "build/src",
