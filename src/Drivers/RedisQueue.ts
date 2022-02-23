@@ -34,6 +34,7 @@ export default class RedisQueue implements DriverContract {
         id: data.id,
         payload: data.data,
         progress: data.progress,
+        reportProgress: data.reportProgress,
       })
     }
 
