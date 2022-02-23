@@ -5,7 +5,10 @@ const unwrap = (job) => ({
   id: job.id,
   payload: job.data,
   progress: job.progress,
-  reportProgress: job.reportProgress,
+  reportProgress(progress) {
+    this.progress = progress
+    return job.reportProgress(progress)
+  },
 })
 
 export default class RedisQueue implements DriverContract {
