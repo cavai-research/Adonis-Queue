@@ -22,6 +22,6 @@ export default class QueueProvider {
   }
 
   public async shutdown() {
-    // Cleanup, since app is going down
+    await this.app.container.resolveBinding('Cavai/Queue').closeAll()
   }
 }

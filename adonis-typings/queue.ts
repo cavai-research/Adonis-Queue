@@ -4,6 +4,7 @@ declare module '@ioc:Cavai/Queue' {
   export interface QueueContract {
     use(mappingName: string): DriverContract
     extend(driverName: string, callback: ExtendCallback)
+    closeAll(): Promise<void>
   }
 
   export interface JobContract<T extends Record<string, any>> {
@@ -17,6 +18,7 @@ declare module '@ioc:Cavai/Queue' {
     add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>>
     process(callback: (job: JobContract<any>) => Promise<void>): void
     getJob(id: number | string): Promise<JobContract<any> | null>
+    close(): Promise<void>
   }
 
   const Queue: QueueContract
