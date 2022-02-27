@@ -2,6 +2,7 @@ name: test
 on:
   - push
   - pull_request
+
 jobs:
   linux:
     runs-on: ubuntu-latest
@@ -10,6 +11,13 @@ jobs:
         node-version:
           - 14.15.4
           - 17.x
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379/tcp
+
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -20,6 +28,7 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm test
+
   windows:
     runs-on: windows-latest
     strategy:
@@ -27,6 +36,13 @@ jobs:
         node-version:
           - 14.15.4
           - 17.x
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379/tcp
+
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
