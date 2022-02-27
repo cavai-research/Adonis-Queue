@@ -11,7 +11,7 @@ test.group('Queue', (group) => {
 
   const config = {
     mem: { driver: 'memory', config: { pollingDelay: 10 } },
-    red: { driver: 'redis', config: {} },
+    red: { driver: 'redis', config: { host: 'localhost' } },
   }
 
   group.each.setup(async () => {
