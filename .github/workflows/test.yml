@@ -30,7 +30,9 @@ jobs:
         run: npm test
 
   windows:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    container: windows-latest
+
     strategy:
       matrix:
         node-version:
@@ -40,8 +42,6 @@ jobs:
     services:
       redis:
         image: redis
-        ports:
-          - 6379:6379
 
     steps:
       - uses: actions/checkout@v2
@@ -53,3 +53,5 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm test
+        env:
+          REDIS_HOST: redis

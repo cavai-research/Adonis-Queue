@@ -5,13 +5,15 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { fs, setupApp, sleep } from '../test-helpers'
 import { JobContract } from '@ioc:Cavai/Queue'
 
+const redisHost = process.env.REDIS_HOST || 'localhost'
+
 test.group('Queue', (group) => {
   let app: ApplicationContract
   let queue: Queue
 
   const config = {
     mem: { driver: 'memory', config: { pollingDelay: 10 } },
-    red: { driver: 'redis', config: { host: 'localhost' } },
+    red: { driver: 'redis', config: { host: redisHost } },
   }
 
   group.each.setup(async () => {
