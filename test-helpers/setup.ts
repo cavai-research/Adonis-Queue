@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 import { Application } from '@adonisjs/application'
