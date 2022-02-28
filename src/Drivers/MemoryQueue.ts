@@ -4,6 +4,7 @@ export default class MemoryQueue implements DriverContract {
   private queue = {}
   private idCounter = 0
   private booted = false
+  private poller = null
 
   constructor(private config, private app) {
     this.boot()
@@ -53,7 +54,7 @@ export default class MemoryQueue implements DriverContract {
         this.queue[nextJobId].status === 'done'
         nextJobId++
       }
-      setTimeout(() => {
+      this.poller = setTimeout(() => {
         work(nextJobId++)
       }, this.config.config.pollingDelay || 200)
     }
@@ -67,5 +68,11 @@ export default class MemoryQueue implements DriverContract {
    */
   public async getJob(id: string | number): Promise<JobContract<any> | null> {
     return this.queue[id] || null
+  }
+
+  public async close(): Promise<void> {
+    if (!this.poller) return
+    clearTimeout(this.poller)
+    this.poller = null
   }
 }

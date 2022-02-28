@@ -12,7 +12,7 @@ const unwrap = (job) => ({
 })
 
 export default class RedisQueue implements DriverContract {
-  private queue = new BeeQueue(this.config.name)
+  private queue: BeeQueue = new BeeQueue(this.config.name)
 
   // @ts-ignore unused app variable
   constructor(private config, private app) {}
@@ -46,5 +46,9 @@ export default class RedisQueue implements DriverContract {
   public async getJob(id: string | number): Promise<JobContract<any> | null> {
     const job = await this.queue.getJob(String(id))
     return !job ? null : unwrap(job)
+  }
+
+  public async close(): Promise<void> {
+    return await this.queue.close()
   }
 }

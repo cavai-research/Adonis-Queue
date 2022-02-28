@@ -1,6 +1,6 @@
 import RedisQueue from './Drivers/RedisQueue'
 import MemoryQueue from './Drivers/MemoryQueue'
-import { QueueContract, ExtendCallback } from '@ioc:Cavai/Queue'
+import { QueueContract, DriverContract, ExtendCallback } from '@ioc:Cavai/Queue'
 
 export default class Queue implements QueueContract {
   /**
@@ -61,5 +61,12 @@ export default class Queue implements QueueContract {
     }
 
     throw new Error(`Unknown driver ${driverName}`)
+  }
+
+  public async closeAll(): Promise<void> {
+    const drivers = Object.values(this.mappingsCache)
+      .map((d) => d as DriverContract)
+      .filter((d) => d)
+    await Promise.all(drivers.map((driver) => driver.close()))
   }
 }
