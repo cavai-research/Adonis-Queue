@@ -9,59 +9,40 @@ const redisHost = process.env.REDIS_HOST || 'localhost'
 
 test.group('Queue', (group) => {
   let app: ApplicationContract
-  let queue: Queue
+  let queues: Queue
 
-  const config = {
+  const configs = {
     mem: { driver: 'memory', config: { pollingDelay: 10 } },
     red: { driver: 'redis', config: { host: redisHost } },
   }
 
   group.each.setup(async () => {
     app = await setupApp()
-    queue = new Queue(config, app)
+    queues = new Queue(configs, app)
   })
 
   group.each.teardown(async () => {
     await app.shutdown()
-    await queue.closeAll()
+    await queues.closeAll()
     await fs.cleanup()
   })
 
-  test('reports progress for memory queue', async ({ expect }) => {
-    const memoryQueue = queue.use('mem')
+  for (const [name, config] of Object.entries(configs))
+    test(`reports progress for ${config.driver} queue`, async ({ expect }) => {
+      const queue = queues.use(name)
 
-    memoryQueue.process(async (job: JobContract<any>) => {
+      queue.process(async (job: JobContract<any>) => {
       job.reportProgress('started')
       await sleep(100)
       job.reportProgress('finished')
     })
 
-    const job = await memoryQueue.add()
+      const job = await queue.add()
 
     await sleep(50)
-    const started = (await memoryQueue.getJob(job.id))?.progress
+      const started = (await queue.getJob(job.id))?.progress
     await sleep(100)
-    const finished = (await memoryQueue.getJob(job.id))?.progress
-
-    expect(started).toBe('started')
-    expect(finished).toBe('finished')
-  })
-
-  test('reports progress for redis queue', async ({ expect }) => {
-    const redisQueue = queue.use('red')
-
-    redisQueue.process(async (job: JobContract<any>) => {
-      job.reportProgress('started')
-      await sleep(100)
-      job.reportProgress('finished')
-    })
-
-    const job = await redisQueue.add()
-
-    await sleep(50)
-    const started = (await redisQueue.getJob(job.id))?.progress
-    await sleep(100)
-    const finished = (await redisQueue.getJob(job.id))?.progress
+      const finished = (await queue.getJob(job.id))?.progress
 
     expect(started).toBe('started')
     expect(finished).toBe('finished')
