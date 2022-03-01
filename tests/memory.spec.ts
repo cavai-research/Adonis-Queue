@@ -5,15 +5,17 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { fs, setupApp, sleep } from '../test-helpers'
 import { JobContract } from '@ioc:Cavai/Queue'
 
-const redisHost = process.env.REDIS_HOST || 'localhost'
+const redisHost = process.env.REDIS_HOST
 
 test.group('Queue', (group) => {
   let app: ApplicationContract
   let queues: Queue
 
+  const redis = !redisHost ? {} : { red: { driver: 'redis', config: { host: redisHost } } }
+
   const configs = {
     mem: { driver: 'memory', config: { pollingDelay: 10 } },
-    red: { driver: 'redis', config: { host: redisHost } },
+    ...redis,
   }
 
   group.each.setup(async () => {
@@ -32,19 +34,19 @@ test.group('Queue', (group) => {
       const queue = queues.use(name)
 
       queue.process(async (job: JobContract<any>) => {
-      job.reportProgress('started')
-      await sleep(100)
-      job.reportProgress('finished')
-    })
+        job.reportProgress('started')
+        await sleep(100)
+        job.reportProgress('finished')
+      })
 
       const job = await queue.add()
 
-    await sleep(50)
+      await sleep(50)
       const started = (await queue.getJob(job.id))?.progress
-    await sleep(100)
+      await sleep(100)
       const finished = (await queue.getJob(job.id))?.progress
 
-    expect(started).toBe('started')
-    expect(finished).toBe('finished')
-  })
+      expect(started).toBe('started')
+      expect(finished).toBe('finished')
+    })
 })

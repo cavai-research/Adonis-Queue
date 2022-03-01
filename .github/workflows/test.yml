@@ -28,20 +28,17 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm test
+        env:
+          REDIS_HOST: localhost
 
   windows:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/windows:1809-amd64
+    runs-on: windows-latest
 
     strategy:
       matrix:
         node-version:
           - 14.15.4
           - 17.x
-
-    services:
-      redis:
-        image: redis
 
     steps:
       - uses: actions/checkout@v2
@@ -53,5 +50,3 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm test
-        env:
-          REDIS_HOST: redis
