@@ -8,5 +8,7 @@ export default {
   },
   redisQueue: {
     name: 'redis',
+    driver: 'redis',
+    config: {},
   },
 }
