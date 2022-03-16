@@ -16,7 +16,18 @@ test.group('Queue', (group) => {
 
   setupGroup(group, configs)
 
-  for (const [name, config] of Object.entries(configs))
+  for (const [name, config] of Object.entries(configs)) {
+    test(`add rejects if ${config.driver} queue is closed`, async ({ queues, expect }) => {
+      const queue = queues.use(name)
+      await queue.close()
+      await expect(queue.add()).rejects.toThrow()
+    })
+
+    test(`add returns job id from ${config.driver} queue`, async function ({ queues, expect }) {
+      const { id } = await queues.use(name).add()
+      expect(id).toBeTruthy()
+    })
+
     test(`reports progress for ${config.driver} queue`, async ({ queues, expect }) => {
       const queue = queues.use(name)
 
@@ -36,4 +47,5 @@ test.group('Queue', (group) => {
       expect(started).toBe('started')
       expect(finished).toBe('finished')
     })
+  }
 })

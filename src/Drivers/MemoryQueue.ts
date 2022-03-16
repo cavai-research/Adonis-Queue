@@ -4,6 +4,7 @@ export default class MemoryQueue implements DriverContract {
   private queue = {}
   private idCounter = 0
   private booted = false
+  private closed = false
   private poller = null
 
   constructor(private config, private app) {
@@ -27,6 +28,8 @@ export default class MemoryQueue implements DriverContract {
    * @param payload Payload to queue for processing
    */
   public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
+    if (this.closed) throw new Error('closed')
+
     this.idCounter++
     const job = {
       payload,
@@ -71,6 +74,7 @@ export default class MemoryQueue implements DriverContract {
   }
 
   public async close(): Promise<void> {
+    this.closed = true
     if (!this.poller) return
     clearTimeout(this.poller)
     this.poller = null
