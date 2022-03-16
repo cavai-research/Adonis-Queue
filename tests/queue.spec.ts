@@ -1,16 +1,12 @@
 import { test } from '@japa/runner'
 import Queue from '../src/Queue'
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
-import { fs, setupApp, sleep } from '../test-helpers'
+import { setupGroup, sleep } from '../test-helpers'
 import { JobContract } from '@ioc:Cavai/Queue'
 
 const redisHost = process.env.REDIS_HOST
 
 test.group('Queue', (group) => {
-  let app: ApplicationContract
-  let queues: Queue
-
   const redis = !redisHost ? {} : { red: { driver: 'redis', config: { host: redisHost } } }
 
   const configs = {
@@ -18,19 +14,10 @@ test.group('Queue', (group) => {
     ...redis,
   }
 
-  group.each.setup(async () => {
-    app = await setupApp()
-    queues = new Queue(configs, app)
-  })
-
-  group.each.teardown(async () => {
-    await app.shutdown()
-    await queues.closeAll()
-    await fs.cleanup()
-  })
+  setupGroup(group, configs)
 
   for (const [name, config] of Object.entries(configs))
-    test(`reports progress for ${config.driver} queue`, async ({ expect }) => {
+    test(`reports progress for ${config.driver} queue`, async ({ queues, expect }) => {
       const queue = queues.use(name)
 
       queue.process(async (job: JobContract<any>) => {

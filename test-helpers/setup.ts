@@ -3,6 +3,9 @@ import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 import { Application } from '@adonisjs/application'
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { Group, TestContext } from '@japa/core'
+
+import Queue from '../src/Queue'
 
 const SECRET = 'asecureandlongrandomsecret'
 export const fs = new Filesystem(join(__dirname, '__app'))
@@ -54,4 +57,34 @@ export async function setupApp(additionalProviders?: string[]): Promise<Applicat
   await app.bootProviders()
 
   return app
+}
+
+declare module '@japa/runner' {
+  interface TestContext {
+    queues: Queue
+  }
+}
+
+export function setupGroup(group: Group<TestContext>, configs: any) {
+  let app: ApplicationContract
+
+  group.setup(async () => {
+    app = await setupApp()
+  })
+
+  group.teardown(async () => {
+    await app.shutdown()
+    await fs.cleanup()
+  })
+
+  group.each.setup(async ({ context }) => {
+    const configCopy = JSON.parse(JSON.stringify(configs))
+    for (const value of Object.values(configCopy)) value.name = Math.random()
+
+    context.queues = new Queue(configCopy, app)
+  })
+
+  group.each.teardown(async ({ context }) => {
+    await context.queues.closeAll()
+  })
 }
