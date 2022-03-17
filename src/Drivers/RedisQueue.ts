@@ -41,7 +41,8 @@ export default class RedisQueue implements DriverContract {
    * which receives queued job
    */
   public process(cb) {
-    const remappedCallback = (job) => cb(unwrap(job))
+    // BeeQueue breaks if callback is NOT async
+    const remappedCallback = async (job) => await cb(unwrap(job))
     this.getQueue().process(remappedCallback)
   }
 
