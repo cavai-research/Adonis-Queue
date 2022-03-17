@@ -17,10 +17,10 @@ test.group('Queue', (group) => {
   setupGroup(group, configs)
 
   for (const [name, config] of Object.entries(configs)) {
-    test(`add rejects if ${config.driver} queue is closed`, async ({ queues, expect }) => {
+    test(`add reopens ${config.driver} queue if it is closed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       await queue.close()
-      await expect(queue.add()).rejects.toThrow()
+      await expect(queue.add()).toBeTruthy()
     })
 
     test(`add returns job id from ${config.driver} queue`, async function ({ queues, expect }) {

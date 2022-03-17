@@ -12,10 +12,17 @@ const unwrap = (job) => ({
 })
 
 export default class RedisQueue implements DriverContract {
-  private queue: BeeQueue = new BeeQueue(this.config.name)
+  private queue: BeeQueue | null = null
 
   // @ts-ignore unused app variable
   constructor(private config, private app) {}
+
+  private getQueue(): BeeQueue {
+    if (this.queue) return this.queue
+
+    this.queue = new BeeQueue(this.config.name)
+    return this.queue
+  }
 
   /**
    * Adds job to queue to be processed
@@ -23,7 +30,7 @@ export default class RedisQueue implements DriverContract {
    * @param payload Payload to queue for processing
    */
   public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
-    const job = await this.queue.createJob<T>(payload).save()
+    const job = await this.getQueue().createJob<T>(payload).save()
     return unwrap(job)
   }
 
@@ -35,7 +42,7 @@ export default class RedisQueue implements DriverContract {
    */
   public process(cb) {
     const remappedCallback = (job) => cb(unwrap(job))
-    this.queue.process(remappedCallback)
+    this.getQueue().process(remappedCallback)
   }
 
   /**
@@ -44,11 +51,13 @@ export default class RedisQueue implements DriverContract {
    * @param id Job ID
    */
   public async getJob(id: string | number): Promise<JobContract<any> | null> {
-    const job = await this.queue.getJob(String(id))
+    const job = await this.getQueue().getJob(String(id))
     return !job ? null : unwrap(job)
   }
 
   public async close(): Promise<void> {
-    return await this.queue.close()
+    if (!this.queue) return
+    await this.queue.close()
+    this.queue = null
   }
 }
