@@ -13,6 +13,7 @@ const unwrap = (job) => ({
 
 export default class RedisQueue implements DriverContract {
   private queue: BeeQueue | null = null
+  private processor: ((job: any) => void) | null = null
 
   // @ts-ignore unused app variable
   constructor(private config, private app) {}
@@ -21,6 +22,7 @@ export default class RedisQueue implements DriverContract {
     if (this.queue) return this.queue
 
     this.queue = new BeeQueue(this.config.name)
+    if (this.processor) this.queue.process(this.processor)
     return this.queue
   }
 
@@ -44,6 +46,7 @@ export default class RedisQueue implements DriverContract {
     // BeeQueue breaks if callback is NOT async
     const remappedCallback = async (job) => await cb(unwrap(job))
     this.getQueue().process(remappedCallback)
+    this.processor = remappedCallback
   }
 
   /**
