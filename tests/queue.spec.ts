@@ -44,5 +44,21 @@ test.group('Queue', (group) => {
       expect(started).toBe('started')
       expect(finished).toBe('finished')
     })
+
+    test(`add resumes ${config.driver} queue`, async ({ queues, expect }) => {
+      const queue = queues.use(name)
+      let counter = 0
+
+      queue.process(() => counter++)
+
+      await queue.add()
+      await queue.add()
+      await sleep(100)
+
+      await queue.close()
+      await queue.add()
+      await sleep(100)
+      expect(counter).toBe(3)
+    })
   }
 })
