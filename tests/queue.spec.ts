@@ -1,8 +1,5 @@
 import { test } from '@japa/runner'
-import Queue from '../src/Queue'
-
 import { setupGroup, sleep } from '../test-helpers'
-import { JobContract } from '@ioc:Cavai/Queue'
 
 const redisHost = process.env.REDIS_HOST
 
@@ -31,7 +28,7 @@ test.group('Queue', (group) => {
     test(`reports progress for ${config.driver} queue`, async ({ queues, expect }) => {
       const queue = queues.use(name)
 
-      queue.process(async (job: JobContract<any>) => {
+      queue.process(async (job) => {
         job.reportProgress('started')
         await sleep(100)
         job.reportProgress('finished')
