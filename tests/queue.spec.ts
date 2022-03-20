@@ -101,4 +101,12 @@ for (const [name, config] of Object.entries(configs))
       await sleep(100)
       expect(counter).toBe(3)
     })
+
+    test(`queue use returns the same queue`, async ({ queues, expect }) => {
+      const queue1 = queues.use(name)
+      const queue2 = queues.use(name)
+      const { id } = await queue1.add()
+      const job = await queue2.getJob(id)
+      expect(job).toBeTruthy
+    })
   })
