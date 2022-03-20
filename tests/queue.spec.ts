@@ -14,6 +14,27 @@ test.group('Queue', (group) => {
   setupGroup(group, configs)
 
   for (const [name, config] of Object.entries(configs)) {
+    test(`single job is executed by ${config.driver} queue`, async ({ queues, expect }) => {
+      const queue = queues.use(name)
+      let done = false
+
+      queue.process(() => (done = true))
+      await queue.add()
+      await sleep(100)
+      expect(done).toBe(true)
+    })
+
+    test(`payload is passed to ${config.driver} queue processor`, async ({ queues, expect }) => {
+      const queue = queues.use(name)
+      const inpPayload = { name: 'test' }
+      let outPayload
+
+      queue.process((job) => (outPayload = job.payload))
+      await queue.add(inpPayload)
+      await sleep(100)
+      expect(outPayload).toEqual(inpPayload)
+    })
+
     test(`add reopens ${config.driver} queue if it is closed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       await queue.close()
