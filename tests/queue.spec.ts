@@ -14,6 +14,16 @@ for (const [name, config] of Object.entries(configs))
   test.group(`${capitalize(config.driver)}Queue`, (group) => {
     setupGroup(group, configs)
 
+    test(`missing queue name throws exception`, async ({ queues, expect }) => {
+      expect(queues.use).toThrow(Error)
+    })
+
+    test(`getJob returns null for missing id`, async ({ queues, expect }) => {
+      const queue = queues.use(name)
+      const id = await queue.getJob()
+      expect(id).toBeNull()
+    })
+
     test(`single job is executed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       let done = false
