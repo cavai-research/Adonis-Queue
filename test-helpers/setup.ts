@@ -59,12 +59,6 @@ export async function setupApp(additionalProviders?: string[]): Promise<Applicat
   return app
 }
 
-declare module '@japa/runner' {
-  interface TestContext {
-    queues: Queue
-  }
-}
-
 export function setupGroup(group: Group<TestContext>, configs: any) {
   let app: ApplicationContract
 
