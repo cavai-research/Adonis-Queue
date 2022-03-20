@@ -31,7 +31,7 @@ export default class MemoryQueue implements DriverContract {
    */
   public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
     const job = {
-      payload,
+      payload: payload || {},
       id: this.newJobId++,
       progress: 0,
       reportProgress: function (progress) {

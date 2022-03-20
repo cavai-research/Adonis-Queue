@@ -35,6 +35,16 @@ for (const [name, config] of Object.entries(configs))
       expect(outPayload).toEqual(inpPayload)
     })
 
+    test(`default payload is object`, async ({ queues, expect }) => {
+      const queue = queues.use(name)
+      let payload
+
+      queue.process((job) => (payload = job.payload))
+      await queue.add()
+      await sleep(100)
+      expect(payload).toEqual({})
+    })
+
     test(`add reopens queue if it is closed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       await queue.close()
