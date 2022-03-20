@@ -3,18 +3,18 @@ import { setupGroup, sleep } from '../test-helpers'
 
 const redisHost = process.env.REDIS_HOST
 
-test.group('Queue', (group) => {
-  const redis = !redisHost ? {} : { red: { driver: 'redis', config: { host: redisHost } } }
+const redis = !redisHost ? {} : { red: { driver: 'redis', config: { host: redisHost } } }
 
-  const configs = {
-    mem: { driver: 'memory', config: { pollingDelay: 10 } },
-    ...redis,
-  }
+const configs = {
+  mem: { driver: 'memory', config: { pollingDelay: 10 } },
+  ...redis,
+}
 
-  setupGroup(group, configs)
+for (const [name, config] of Object.entries(configs))
+  test.group(`${config.driver}Queue`, (group) => {
+    setupGroup(group, configs)
 
-  for (const [name, config] of Object.entries(configs)) {
-    test(`single job is executed by ${config.driver} queue`, async ({ queues, expect }) => {
+    test(`single job is executed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       let done = false
 
@@ -24,7 +24,7 @@ test.group('Queue', (group) => {
       expect(done).toBe(true)
     })
 
-    test(`payload is passed to ${config.driver} queue processor`, async ({ queues, expect }) => {
+    test(`payload is passed to processor`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       const inpPayload = { name: 'test' }
       let outPayload
@@ -35,18 +35,18 @@ test.group('Queue', (group) => {
       expect(outPayload).toEqual(inpPayload)
     })
 
-    test(`add reopens ${config.driver} queue if it is closed`, async ({ queues, expect }) => {
+    test(`add reopens queue if it is closed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       await queue.close()
       await expect(queue.add()).toBeTruthy()
     })
 
-    test(`add returns job id from ${config.driver} queue`, async function ({ queues, expect }) {
+    test(`add returns job id`, async function ({ queues, expect }) {
       const { id } = await queues.use(name).add()
       expect(id).toBeTruthy()
     })
 
-    test(`reports progress for ${config.driver} queue`, async ({ queues, expect }) => {
+    test(`reports progress`, async ({ queues, expect }) => {
       const queue = queues.use(name)
 
       queue.process(async (job) => {
@@ -66,7 +66,7 @@ test.group('Queue', (group) => {
       expect(finished).toBe('finished')
     })
 
-    test(`add resumes ${config.driver} queue`, async ({ queues, expect }) => {
+    test(`add resumes queue`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       let counter = 0
 
@@ -81,5 +81,4 @@ test.group('Queue', (group) => {
       await sleep(100)
       expect(counter).toBe(3)
     })
-  }
-})
+  })
