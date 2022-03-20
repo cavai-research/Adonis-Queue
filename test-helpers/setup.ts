@@ -73,12 +73,15 @@ export function setupGroup(group: Group<TestContext>, configs: any) {
 
   group.each.setup(async ({ context }) => {
     const configCopy = JSON.parse(JSON.stringify(configs))
+    // @ts-ignore
     for (const value of Object.values(configCopy)) value.name = Math.random()
 
+    // @ts-ignore
     context.queues = new Queue(configCopy, app)
   })
 
   group.each.teardown(async ({ context }) => {
+    // @ts-ignore
     await context.queues.closeAll()
   })
 }
