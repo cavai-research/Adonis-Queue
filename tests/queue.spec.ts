@@ -1,5 +1,5 @@
 import { test } from '@japa/runner'
-import { setupGroup, sleep } from '../test-helpers'
+import { setupGroup, sleep, capitalize } from '../test-helpers'
 
 const redisHost = process.env.REDIS_HOST
 
@@ -11,7 +11,7 @@ const configs = {
 }
 
 for (const [name, config] of Object.entries(configs))
-  test.group(`${config.driver}Queue`, (group) => {
+  test.group(`${capitalize(config.driver)}Queue`, (group) => {
     setupGroup(group, configs)
 
     test(`single job is executed`, async ({ queues, expect }) => {
