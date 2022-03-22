@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import MemoryQueue from '../src/Drivers/MemoryQueue'
 import { setupGroup, sleep, capitalize } from '../test-helpers'
 
 const redisHost = process.env.REDIS_HOST
@@ -114,3 +115,23 @@ for (const [name, config] of Object.entries(configs))
       expect(job).toBeTruthy
     })
   })
+
+test.group(`ExtendedQueue`, (group) => {
+  setupGroup(group, {
+    ext: { driver: 'extended', config: { pollingDelay: 10 } },
+  })
+
+  test(`allows extensions`, async function ({ queues, expect }) {
+    expect(() => queues.use('ext')).toThrow()
+    queues.extend('extended', (cfg, app) => new MemoryQueue(cfg, app))
+    expect(() => queues.use('ext')).toBeTruthy()
+  })
+
+  test(`extensions work`, async function ({ queues, expect }) {
+    queues.extend('extended', (cfg, app) => new MemoryQueue(cfg, app))
+    const queue = queues.use('ext')
+    const { id } = await queue.add({})
+    const job = await queue.getJob(id)
+    expect(job).toBeTruthy()
+  })
+})
