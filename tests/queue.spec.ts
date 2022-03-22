@@ -20,7 +20,7 @@ for (const [name, config] of Object.entries(configs))
 
     test(`getJob returns null for missing id`, async ({ queues, expect }) => {
       const queue = queues.use(name)
-      const id = await queue.getJob()
+      const id = await queue.getJob(111)
       expect(id).toBeNull()
     })
 
@@ -28,8 +28,10 @@ for (const [name, config] of Object.entries(configs))
       const queue = queues.use(name)
       let done = false
 
-      queue.process(() => (done = true))
-      await queue.add()
+      queue.process(async () => {
+        done = true
+      })
+      await queue.add({})
       await sleep(100)
       expect(done).toBe(true)
     })
@@ -50,7 +52,7 @@ for (const [name, config] of Object.entries(configs))
       let payload
 
       queue.process((job) => (payload = job.payload))
-      await queue.add()
+      await queue.add({})
       await sleep(100)
       expect(payload).toEqual({})
     })
@@ -58,11 +60,11 @@ for (const [name, config] of Object.entries(configs))
     test(`add reopens queue if it is closed`, async ({ queues, expect }) => {
       const queue = queues.use(name)
       await queue.close()
-      await expect(queue.add()).toBeTruthy()
+      await expect(queue.add({})).toBeTruthy()
     })
 
     test(`add returns job id`, async function ({ queues, expect }) {
-      const { id } = await queues.use(name).add()
+      const { id } = await queues.use(name).add({})
       expect(id).toBeTruthy()
     })
 
@@ -75,7 +77,7 @@ for (const [name, config] of Object.entries(configs))
         job.reportProgress('finished')
       })
 
-      const job = await queue.add()
+      const job = await queue.add({})
 
       await sleep(50)
       const started = (await queue.getJob(job.id))?.progress
@@ -90,14 +92,16 @@ for (const [name, config] of Object.entries(configs))
       const queue = queues.use(name)
       let counter = 0
 
-      queue.process(() => counter++)
+      queue.process(async () => {
+        counter++
+      })
 
-      await queue.add()
-      await queue.add()
+      await queue.add({})
+      await queue.add({})
       await sleep(100)
 
       await queue.close()
-      await queue.add()
+      await queue.add({})
       await sleep(100)
       expect(counter).toBe(3)
     })
@@ -105,7 +109,7 @@ for (const [name, config] of Object.entries(configs))
     test(`queue use returns the same queue`, async ({ queues, expect }) => {
       const queue1 = queues.use(name)
       const queue2 = queues.use(name)
-      const { id } = await queue1.add()
+      const { id } = await queue1.add({})
       const job = await queue2.getJob(id)
       expect(job).toBeTruthy
     })

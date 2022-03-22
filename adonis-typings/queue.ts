@@ -1,5 +1,11 @@
+interface Dictionary<T> {
+  [key: string]: T
+}
+
 declare module '@ioc:Cavai/Queue' {
-  export type ExtendCallback = (queue: QueueContract) => DriverContract
+  export type Config = any
+
+  export type ExtendCallback = (config: Config, app) => DriverContract
 
   export interface QueueContract {
     use(mappingName: string): DriverContract

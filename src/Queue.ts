@@ -1,24 +1,24 @@
 import RedisQueue from './Drivers/RedisQueue'
 import MemoryQueue from './Drivers/MemoryQueue'
-import { QueueContract, DriverContract, ExtendCallback } from '@ioc:Cavai/Queue'
+import { QueueContract, DriverContract, ExtendCallback, Config } from '@ioc:Cavai/Queue'
 
 export default class Queue implements QueueContract {
   /**
    * Cache for extended drivers, to keep them in memory
    */
-  private extendedDrivers: any = {}
+  private extendedDrivers: Dictionary<ExtendCallback> = {}
   /**
    * Cache to keep already existing mappings in the memory
    */
-  private mappingsCache: any = {}
+  private mappingsCache: Dictionary<DriverContract> = {}
 
-  constructor(private config, private app) {}
+  constructor(private config: Config, private app) {}
 
   /**
    * Defines queue driver mapping to use
    * In case given mapping does exist it creates create new queue
    */
-  public use(mappingName: string) {
+  public use(mappingName: string): DriverContract {
     if (!this.config[mappingName]) {
       throw new Error(`Unknown mapping: ${mappingName}`)
     }
@@ -41,7 +41,7 @@ export default class Queue implements QueueContract {
   /**
    * Creates queue driver
    */
-  protected createDriver(config, driverName) {
+  protected createDriver(config: Config, driverName: string): DriverContract {
     switch (driverName) {
       case 'redis':
         return new RedisQueue(config, this.app)
@@ -53,9 +53,9 @@ export default class Queue implements QueueContract {
   }
 
   /**
-   * @TODO: Not implemented
+   * Creates extended driver
    */
-  protected makeExtendedDriver(config, driverName) {
+  protected makeExtendedDriver(config: Config, driverName: string): DriverContract {
     if (this.extendedDrivers[driverName]) {
       return this.extendedDrivers[driverName](config, this.app)
     }
@@ -65,8 +65,6 @@ export default class Queue implements QueueContract {
 
   public async closeAll(): Promise<void> {
     const drivers = Object.values(this.mappingsCache)
-      .map((d) => d as DriverContract)
-      .filter((d) => d)
     await Promise.all(drivers.map((driver) => driver.close()))
   }
 }
