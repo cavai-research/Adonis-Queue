@@ -2,9 +2,12 @@ import { DriverContract, JobContract } from '@ioc:Cavai/Queue'
 
 export default class MemoryQueue implements DriverContract {
   private queue = {}
-  private idCounter = 0
+  private newJobId = 1
+  private nextJobId = 1
   private booted = false
-  private poller = null
+  private poller: NodeJS.Timeout | null = null
+  private processing: boolean = false
+  private processor: ((job: JobContract<any>) => void) | null = null
 
   constructor(private config, private app) {
     this.boot()
@@ -27,16 +30,17 @@ export default class MemoryQueue implements DriverContract {
    * @param payload Payload to queue for processing
    */
   public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
-    this.idCounter++
     const job = {
-      payload,
-      id: this.idCounter,
+      payload: payload || {},
+      id: this.newJobId++,
       progress: 0,
       reportProgress: function (progress) {
         this.progress = progress
       },
     }
-    this.queue[this.idCounter] = job
+    this.queue[job.id] = job
+    this.start()
+
     return job
   }
 
@@ -48,17 +52,42 @@ export default class MemoryQueue implements DriverContract {
    * which receives queued job
    */
   public process(cb: (job: JobContract<any>) => void) {
-    const work = async (nextJobId) => {
-      if (this.queue[nextJobId] && this.queue[nextJobId].status !== 'done') {
-        await cb(this.queue[nextJobId])
-        this.queue[nextJobId].status === 'done'
-        nextJobId++
+    this.processor = cb
+    this.start()
+  }
+
+  private start() {
+    if (this.poller || this.processing) return
+    if (!this.processor) return
+
+    const { pollingDelay = 200 } = this.config.config
+    const postpone = () => (this.poller = setTimeout(work, pollingDelay))
+
+    const work = async () => {
+      if (!this.processor) return
+      try {
+        this.processing = true
+        this.poller = null
+
+        const job = this.queue[this.nextJobId]
+        if (!job) return
+
+        this.nextJobId++
+
+        if (job.status !== 'done') {
+          await this.processor(job)
+          job.status = 'done'
+        }
+
+        postpone()
+      } catch {
+        postpone()
+      } finally {
+        this.processing = false
       }
-      this.poller = setTimeout(() => {
-        work(nextJobId++)
-      }, this.config.config.pollingDelay || 200)
     }
-    work(1)
+
+    postpone()
   }
 
   /**

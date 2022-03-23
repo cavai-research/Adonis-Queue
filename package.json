@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "pretest": "npm run lint",
     "test": "node -r ts-node/register/transpile-only bin/test.ts",
+    "cover": "tsc && nyc --reporter=html --reporter=text npm run test",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "copyfiles": "copyfiles \"templates/**/*.txt\" build",
@@ -50,6 +51,7 @@
     "japa": "^4.0.0",
     "mrm": "^3.0.5",
     "np": "^7.6.0",
+    "nyc": "^15.1.0",
     "prettier": "^2.2.1",
     "ts-node": "^10.5.0",
     "typescript": "^4.3.5"
@@ -131,6 +133,9 @@
   "np": {
     "contents": ".",
     "anyBranch": false
+  },
+  "nyc": {
+    "include": "src"
   },
   "description": "> Basic AdonisJS queue provider",
   "repository": {
