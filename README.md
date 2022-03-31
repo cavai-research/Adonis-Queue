@@ -35,7 +35,7 @@ Queue configuration file is in `config/queue.ts`
 
 Memory queue is the most basic queue. It runs jobs async in the background and is recommended for testing and developing or for some really basic use-cases
 
-It doesn't require any additional setup, but having some heavy running job can stop whole NodeJS event loop, thus making whole application unresponsive. Since whole queue and job state are stored in memory, they will be wiped in case of application restarts / crashes
+It doesn't require any additional setup, but having some heavy running job can stop the whole NodeJS event loop, thus making application unresponsive. Since all memory queues and job state are stored in memory, they will be wiped in case of application restarts / crashes
 
 Default memory queue configuration:
 
@@ -57,13 +57,13 @@ export default {
 
 ## Redis queue
 
-Redis queue users lightweight [BeeQueue](https://github.com/bee-queue/bee-queue) under the hood
+Redis queue uses lightweight [BeeQueue](https://github.com/bee-queue/bee-queue) under the hood
 
-Redis version is better for production, since it doesn't have the problems that memory queue have. Data is persisted in Redis and in case of application crashes or restarts it's not lost.
+Redis version is better for production, since it doesn't have the problems that memory queue has. Data is persisted in Redis and in case of application crashes or restarts it's not lost.
 
-Redis queue job processing is also ran as separate NodeJS instance, so any job can't block main application event loop and vice-versa
+Redis queue job processing is also ran as a separate NodeJS instance, so any job can't block the main application event loop and vice-versa
 
-Downside of this queue is slightly harder setup, since it requires Redis to be installed and slightly higher resource consumption. There will be another instance of NodeJS and Redis also running, instead of just single NodeJS instance
+Downside of this queue is a slightly harder setup, since it requires Redis to be installed, and slightly higher resource consumption. There will be another instance of NodeJS and Redis also running, instead of just single NodeJS instance
 
 Default Redis queue configuration:
 
@@ -73,10 +73,8 @@ export default {
     name: 'exampleQueue',
     driver: 'redis',
     config: {
-      redis: {
-        host: '127.0.0.1',
-        port: 6379,
-      },
+      host: '127.0.0.1',
+      port: 6379,
     },
   },
 }
@@ -88,7 +86,8 @@ export default {
 
 ## Usage
 
-For different kinds of jobs there will be different kinds of queues. For example for emails you might have `signupEmailQueue` while for notifications you might have `discordNotificationQueue`. Jobs from different queues can run in parallel (sharing event loop), while jobs in single queue are executed in order
+For different kinds of jobs there will be different kinds of queues. For example for emails you might have `signupEmailQueue`, while for notifications you might have `discordNotificationQueue`. Jobs from different queues can run in parallel (sharing event loop), while jobs in a single queue are executed in order. However, this doesn't hold when there are multiple processes, in that case jobs in a single queue can be finished out of sequence if they have different durations.
+
 
 ### Define job
 
@@ -131,7 +130,7 @@ let job = Queue.use('signupEmailQueue').add({
 ```ts
 import Queue from '@ioc:Cavai/Queue'
 
-let job = await Queue.use('signupEmailQueue').getJob(10) // where 10 is job ID
+const job = await Queue.use('signupEmailQueue').getJob(10) // where 10 is job ID
 ```
 
 ### Reporting job progress
@@ -154,8 +153,8 @@ Queue.use('signupEmailQueue').process(async (job) => {
       .to(job.payload.email)
       .subject('Welcome Onboard!')
       .htmlView('emails/welcome', { name: job.payload.name })
-    })
-  
+  })
+
   // Report job progress
   job.reportProgress('Mail sent')
 })
@@ -166,3 +165,5 @@ Queue.use('signupEmailQueue').process(async (job) => {
 To run queue just run `node ace queue:start`.
 
 > It's not needed when using only memory queue, since in-memory one will share NodeJS instance with main AdonisJS application
+
+> It's possible to run several queue instances if you want to run jobs in all queues in parallel
