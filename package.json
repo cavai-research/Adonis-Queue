@@ -1,5 +1,5 @@
 {
-  "name": "@cavai/queue",
+  "name": "@cavai/adonis-queue",
   "version": "1.0.1",
   "main": "./build/providers/QueueProvider.js",
   "files": [
@@ -140,11 +140,18 @@
   "description": "> Basic AdonisJS queue provider",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Cavai/Adonis-Queue.git"
+    "url": "git+https://github.com/cavai-research/Adonis-Queue.git"
   },
   "author": "cavai",
   "bugs": {
-    "url": "https://github.com/Cavai/Adonis-Queue/issues"
+    "url": "https://github.com/cavai-research/Adonis-Queue/issues"
   },
-  "homepage": "https://github.com/Cavai/Adonis-Queue#readme"
+  "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [
+    "AdonisJS",
+    "Queue"
+  ]
 }
