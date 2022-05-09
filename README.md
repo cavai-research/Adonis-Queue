@@ -1,4 +1,4 @@
-# AdonisJS Queue
+# Adonis Queue
 
 > Basic AdonisJS queue provider
 
