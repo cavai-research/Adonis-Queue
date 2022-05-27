@@ -1,4 +1,4 @@
-import { DriverContract, JobContract } from '@ioc:Cavai/Queue'
+import { DriverContract, JobContract } from '@ioc:Cavai/Adonis-Queue'
 
 export default class MemoryQueue implements DriverContract {
   private queue = {}

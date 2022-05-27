@@ -1,1 +1,1 @@
-export default ['@cavai/queue/build/commands/StartQueue']
+export default ['@cavai/adonis-queue/build/commands/StartQueue']

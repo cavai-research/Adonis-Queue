@@ -58,9 +58,9 @@
   },
   "license": "MIT",
   "adonisjs": {
-    "types": "@cavai/queue",
+    "types": "@cavai/Adonis-Queue",
     "providers": [
-      "@cavai/queue"
+      "@cavai/Adonis-Queue"
     ],
     "templates": {
       "start": [
@@ -77,7 +77,7 @@
       ]
     },
     "commands": [
-      "@cavai/queue/build/commands"
+      "@cavai/adonis-queue/build/commands"
     ]
   },
   "dependencies": {
