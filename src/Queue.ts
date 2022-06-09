@@ -1,6 +1,6 @@
 import RedisQueue from './Drivers/RedisQueue'
 import MemoryQueue from './Drivers/MemoryQueue'
-import { QueueContract, DriverContract, ExtendCallback, Config } from '@ioc:Cavai/Queue'
+import { QueueContract, DriverContract, ExtendCallback, Config } from '@ioc:Cavai/Adonis-Queue'
 
 export default class Queue implements QueueContract {
   /**

@@ -1,5 +1,5 @@
 import BeeQueue from 'bee-queue'
-import { DriverContract, JobContract } from '@ioc:Cavai/Queue'
+import { DriverContract, JobContract } from '@ioc:Cavai/Adonis-Queue'
 
 const unwrap = (job) => ({
   id: job.id,

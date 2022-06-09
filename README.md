@@ -18,14 +18,15 @@ It's relatively basic currently and doesn't support job timeouts, retries etc. S
   - [Define job](#define-job)
   - [Add job to queue](#add-job-to-queue)
   - [Get job by it's ID](#get-job-by-its-id)
-  - [Report job progress](#report-job-progress)
+  - [Reporting job progress](#reporting-job-progress)
+  - [Start the queue](#start-the-queue)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Installation
 
-- Run `npm install @cavai/queue` to install it
-- Run `node ace invoke @cavai/queue` to generate configuration files
+- Run `npm install @cavai/adonis-queue` to install it
+- Run `node ace invoke @cavai/adonis-queue` to generate configuration files
 
 ## Configuration
 
@@ -94,7 +95,7 @@ For different kinds of jobs there will be different kinds of queues. For example
 By default jobs are defined in `start/jobs.ts`
 
 ```ts
-import Queue from '@ioc:Cavai/Queue'
+import Queue from '@ioc:Cavai/Adonis-Queue'
 import Mail from '@ioc:Adonis/Addons/Mail'
 
 // Defining job in 'signupEmailQueue'
@@ -115,7 +116,7 @@ Queue.use('signupEmailQueue').process(async (job) => {
 Adding jobs to queue can be done everywhere in application. Just need to import queue
 
 ```ts
-import Queue from '@ioc:Cavai/Queue'
+import Queue from '@ioc:Cavai/Adonis-Queue'
 
 // Add job to signupEmailQueue
 // With payload as our nice fake new user
@@ -128,7 +129,7 @@ let job = Queue.use('signupEmailQueue').add({
 ### Get job by it's ID
 
 ```ts
-import Queue from '@ioc:Cavai/Queue'
+import Queue from '@ioc:Cavai/Adonis-Queue'
 
 const job = await Queue.use('signupEmailQueue').getJob(10) // where 10 is job ID
 ```
@@ -138,7 +139,7 @@ const job = await Queue.use('signupEmailQueue').getJob(10) // where 10 is job ID
 Job progress can be reported with `job.reportProgress(any)`
 
 ```ts
-import Queue from '@ioc:Cavai/Queue'
+import Queue from '@ioc:Cavai/Adonis-Queue'
 import Mail from '@ioc:Adonis/Addons/Mail'
 
 // Defining job in 'signupEmailQueue'

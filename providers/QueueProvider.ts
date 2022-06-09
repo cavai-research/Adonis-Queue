@@ -8,7 +8,7 @@ export default class QueueProvider {
 
   public register() {
     // Register your own bindings
-    this.app.container.singleton('Cavai/Queue', () => {
+    this.app.container.singleton('Cavai/Adonis-Queue', () => {
       return new Queue(this.app.container.use('Adonis/Core/Config').get('queue'), this.app)
     })
   }
@@ -22,6 +22,6 @@ export default class QueueProvider {
   }
 
   public async shutdown() {
-    await this.app.container.resolveBinding('Cavai/Queue').closeAll()
+    await this.app.container.resolveBinding('Cavai/Adonis-Queue').closeAll()
   }
 }

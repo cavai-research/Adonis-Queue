@@ -2,7 +2,7 @@ interface Dictionary<T> {
   [key: string]: T
 }
 
-declare module '@ioc:Cavai/Queue' {
+declare module '@ioc:Cavai/Adonis-Queue' {
   export type Config = any
 
   export type ExtendCallback = (config: Config, app) => DriverContract
