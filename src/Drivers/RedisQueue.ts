@@ -1,5 +1,5 @@
 import BeeQueue from 'bee-queue'
-import { DriverContract, JobContract } from '@ioc:Cavai/Adonis-Queue'
+import { AddOptions, DriverContract, JobContract } from '@ioc:Cavai/Adonis-Queue'
 
 const unwrap = (job) => ({
   id: job.id,
@@ -21,7 +21,11 @@ export default class RedisQueue implements DriverContract {
   private getQueue(): BeeQueue {
     if (this.queue) return this.queue
 
-    this.queue = new BeeQueue(this.config.name)
+    const {
+      name,
+      config: { activateDelayedJobs },
+    } = this.config
+    this.queue = new BeeQueue(name, { activateDelayedJobs })
     if (this.processor) this.queue.process(this.processor)
     return this.queue
   }
@@ -31,8 +35,14 @@ export default class RedisQueue implements DriverContract {
    *
    * @param payload Payload to queue for processing
    */
-  public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
-    const job = await this.getQueue().createJob<T>(payload).save()
+  public async add<T extends Record<string, any>>(
+    payload: T,
+    opts: AddOptions = {}
+  ): Promise<JobContract<T>> {
+    const job = this.getQueue().createJob<T>(payload)
+    if (opts.runAt) job.delayUntil(new Date(opts.runAt))
+
+    await job.save()
     return unwrap(job)
   }
 

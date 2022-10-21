@@ -20,8 +20,12 @@ declare module '@ioc:Cavai/Adonis-Queue' {
     reportProgress(progress: any): void
   }
 
+  export interface AddOptions {
+    runAt?: number
+  }
+
   export interface DriverContract {
-    add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>>
+    add<T extends Record<string, any>>(payload: T, options?: AddOptions): Promise<JobContract<T>>
     process(callback: (job: JobContract<any>) => Promise<void>): void
     getJob(id: number | string): Promise<JobContract<any> | null>
     close(): Promise<void>

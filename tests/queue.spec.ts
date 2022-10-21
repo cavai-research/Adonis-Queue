@@ -135,3 +135,43 @@ test.group(`ExtendedQueue`, (group) => {
     expect(job).toBeTruthy()
   })
 })
+
+if (redisHost)
+  test.group('Job scheduling', (group) => {
+    setupGroup(group, {
+      red: { driver: 'redis', config: { host: redisHost } },
+      delay: { driver: 'redis', config: { host: redisHost, activateDelayedJobs: true } },
+    })
+
+    test('job is never processed if delayed jobs are not active', async function ({
+      queues,
+      expect,
+    }) {
+      const queue = queues.use('red')
+      let done = false
+
+      queue.process(async () => {
+        done = true
+      })
+      await queue.add({}, { runAt: Date.now() + 300 })
+      await sleep(1000)
+      expect(done).toBe(false)
+    })
+
+    test('job is processed with a delay if delayed jobs are active', async function ({
+      queues,
+      expect,
+    }) {
+      const queue = queues.use('delay')
+      let done = false
+
+      queue.process(async () => {
+        done = true
+      })
+      await queue.add({}, { runAt: Date.now() + 300 })
+      await sleep(100)
+      expect(done).toBe(false)
+      await sleep(1000)
+      expect(done).toBe(true)
+    })
+  })
