@@ -1,9 +1,9 @@
-import { DriverContract, JobContract } from '@ioc:Cavai/Adonis-Queue'
+import { AddOptions, DriverContract, JobContract } from '@ioc:Cavai/Adonis-Queue'
 
 export default class MemoryQueue implements DriverContract {
-  private queue = {}
+  private queue: JobContract<any>[] = []
+  private index: { [k: string]: JobContract<any> } = {}
   private newJobId = 1
-  private nextJobId = 1
   private booted = false
   private poller: NodeJS.Timeout | null = null
   private processing: boolean = false
@@ -29,17 +29,27 @@ export default class MemoryQueue implements DriverContract {
    *
    * @param payload Payload to queue for processing
    */
-  public async add<T extends Record<string, any>>(payload: T): Promise<JobContract<T>> {
+  public async add<T extends Record<string, any>>(
+    payload: T,
+    opts: AddOptions = {}
+  ): Promise<JobContract<T>> {
     const job = {
       payload: payload || {},
       id: this.newJobId++,
+      runAt: (opts.runAt && +new Date(opts.runAt)) || Date.now(),
+      delayed: !!opts.runAt,
       progress: 0,
       reportProgress: function (progress) {
         this.progress = progress
       },
     }
-    this.queue[job.id] = job
-    this.start()
+
+    this.index[job.id] = job
+    const { activateDelayedJobs = false } = this.config.config
+    if (!job.delayed || activateDelayedJobs) {
+      this.addToQueue(job)
+      this.start()
+    }
 
     return job
   }
@@ -61,7 +71,7 @@ export default class MemoryQueue implements DriverContract {
     if (!this.processor) return
 
     const { pollingDelay = 200 } = this.config.config
-    const postpone = () => (this.poller = setTimeout(work, pollingDelay))
+    const postpone = (ms?: number) => (this.poller = setTimeout(work, ms || pollingDelay))
 
     const work = async () => {
       if (!this.processor) return
@@ -69,10 +79,11 @@ export default class MemoryQueue implements DriverContract {
         this.processing = true
         this.poller = null
 
-        const job = this.queue[this.nextJobId]
+        const job = this.queue[0]
         if (!job) return
+        if (Date.now() < job.runAt) return postpone(job.runAt - Date.now())
 
-        this.nextJobId++
+        this.queue.shift()
 
         if (job.status !== 'done') {
           await this.processor(job)
@@ -90,13 +101,19 @@ export default class MemoryQueue implements DriverContract {
     postpone()
   }
 
+  private addToQueue(job) {
+    const start = this.queue.findIndex((d) => job.runAt < d.runAt)
+    if (start < 0) this.queue.push(job)
+    else this.queue.splice(start, 0, job)
+  }
+
   /**
    * Gets job by ID
    *
    * @param id Job ID
    */
   public async getJob(id: string | number): Promise<JobContract<any> | null> {
-    return this.queue[id] || null
+    return this.index[id] || null
   }
 
   public async close(): Promise<void> {

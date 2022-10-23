@@ -15,6 +15,8 @@ declare module '@ioc:Cavai/Adonis-Queue' {
 
   export interface JobContract<T extends Record<string, any>> {
     id: string | number
+    runAt: number
+    delayed: boolean
     payload: T
     progress?: any
     reportProgress(progress: any): void
