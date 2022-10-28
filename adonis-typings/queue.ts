@@ -19,6 +19,7 @@ declare module '@ioc:Cavai/Adonis-Queue' {
     delayed: boolean
     payload: T
     progress?: any
+    status?: any
     reportProgress(progress: any): void
   }
 
