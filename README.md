@@ -4,7 +4,7 @@
 
 It provides in-memory and Redis based queues to run jobs in
 
-It's relatively basic currently and doesn't support job timeouts, retries etc. Supports extending it, adding jobs to queue, processing them and reporting their status
+It's relatively basic currently and doesn't support job timeouts, retries etc. Supports extending it, adding jobs to queue, processing them, reporting their status and delaying them.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -17,7 +17,8 @@ It's relatively basic currently and doesn't support job timeouts, retries etc. S
 - [Usage](#usage)
   - [Define job](#define-job)
   - [Add job to queue](#add-job-to-queue)
-  - [Get job by it's ID](#get-job-by-its-id)
+  - [Delaying a job](#delaying-a-job)
+  - [Get job by its ID](#get-job-by-its-id)
   - [Reporting job progress](#reporting-job-progress)
   - [Start the queue](#start-the-queue)
 
@@ -32,7 +33,7 @@ It's relatively basic currently and doesn't support job timeouts, retries etc. S
 
 Queue configuration file is in `config/queue.ts`
 
-## Memory queue (default)
+### Memory queue (default)
 
 Memory queue is the most basic queue. It runs jobs async in the background and is recommended for testing and developing or for some really basic use-cases
 
@@ -47,6 +48,7 @@ export default {
     driver: 'memory',
     config: {
       pollingDelay: 500,
+      activateDelayedJobs: false,
     },
   },
 }
@@ -54,9 +56,11 @@ export default {
 
 - **name** is just name of queue. It's nice to have it the same as queue object
 - **driver** is the driver to use. In current case it's `memory`
-- **config** additional configuration specific for memory queue. Currently only contains `pollingDelay` which is delay how often queue is checked for new jobs
+- **config** additional configuration specific for memory queue.
+  - `pollingDelay`: a time in milliseconds that determines how quickly the next job is started after finishing the previous one;
+  - `activateDelayedJobs`: a setting that enables delayed jobs. If it is disabled and a job with `runAt` property is added, it is never processed.
 
-## Redis queue
+### Redis queue
 
 Redis queue uses lightweight [BeeQueue](https://github.com/bee-queue/bee-queue) under the hood
 
@@ -76,6 +80,7 @@ export default {
     config: {
       host: '127.0.0.1',
       port: 6379,
+      activateDelayedJobs: false,
     },
   },
 }
@@ -88,7 +93,6 @@ export default {
 ## Usage
 
 For different kinds of jobs there will be different kinds of queues. For example for emails you might have `signupEmailQueue`, while for notifications you might have `discordNotificationQueue`. Jobs from different queues can run in parallel (sharing event loop), while jobs in a single queue are executed in order. However, this doesn't hold when there are multiple processes, in that case jobs in a single queue can be finished out of sequence if they have different durations.
-
 
 ### Define job
 
@@ -126,7 +130,27 @@ let job = Queue.use('signupEmailQueue').add({
 })
 ```
 
-### Get job by it's ID
+### Delaying a job
+
+To add a delayed job to the queue add an options object as a second argument containing `runAt` time in milliseconds when the processing of the job should be started.
+
+Note: a delayed job will be processed only if the setting `activateDelayedJobs` of the queue is enabled (see [above](#configuration)).
+
+```ts
+import Queue from '@ioc:Cavai/Adonis-Queue'
+
+// Add job to signupEmailQueue
+// With payload as our nice fake new user
+// and with a delay of 300 ms
+let job = Queue.use('signupEmailQueue').add({
+  email: 'foo@bar.com',
+  name: 'FooBar',
+}, {
+  runAt: Date.now() + 300,
+})
+```
+
+### Get job by its ID
 
 ```ts
 import Queue from '@ioc:Cavai/Adonis-Queue'

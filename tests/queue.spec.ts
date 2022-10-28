@@ -11,9 +11,16 @@ const configs = {
   ...redis,
 }
 
+const configsDelayed = Object.fromEntries(
+  Object.entries(configs).map(([k, v]) => [
+    k + 'Delayed',
+    { ...v, config: { ...v.config, activateDelayedJobs: true } },
+  ])
+)
+
 for (const [name, config] of Object.entries(configs))
   test.group(`${capitalize(config.driver)}Queue`, (group) => {
-    setupGroup(group, configs)
+    setupGroup(group, { ...configs, ...configsDelayed })
 
     test(`missing queue name throws exception`, async ({ queues, expect }) => {
       expect(queues.use).toThrow(Error)
@@ -113,6 +120,52 @@ for (const [name, config] of Object.entries(configs))
       const { id } = await queue1.add({})
       const job = await queue2.getJob(id)
       expect(job).toBeTruthy
+    })
+
+    test('scheduled job is never processed if delayed jobs are not active', async function ({
+      queues,
+      expect,
+    }) {
+      const queue = queues.use(name)
+      let done = false
+
+      queue.process(async () => {
+        done = true
+      })
+      await queue.add({}, { runAt: Date.now() + 300 })
+      await sleep(1000)
+      expect(done).toBe(false)
+    })
+
+    test('scheduled job is processed with a delay if delayed jobs are active', async function ({
+      queues,
+      expect,
+    }) {
+      const queue = queues.use(name + 'Delayed')
+      let done = false
+
+      queue.process(async () => {
+        done = true
+      })
+      await queue.add({}, { runAt: Date.now() + 300 })
+      await sleep(100)
+      expect(done).toBe(false)
+      await sleep(1000)
+      expect(done).toBe(true)
+    })
+
+    test('scheduled jobs are started in the right order', async function ({ queues, expect }) {
+      const queue = queues.use(name + 'Delayed')
+      const started: any = []
+
+      queue.process(async (job) => started.push(job.id))
+      const job1 = await queue.add({})
+      const job2 = await queue.add({}, { runAt: Date.now() + 1000 })
+      const job3 = await queue.add({})
+      const job4 = await queue.add({}, { runAt: Date.now() + 300 })
+
+      await sleep(1500)
+      expect(started).toEqual([job1.id, job3.id, job4.id, job2.id])
     })
   })
 
