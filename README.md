@@ -1,6 +1,6 @@
 # Adonis Queue
 
-> Basic AdonisJS queue provider
+> Job queue and scheduler for AdonisJS 5
 
 It provides in-memory and Redis based queues to run jobs in
 
