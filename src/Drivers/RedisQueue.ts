@@ -5,6 +5,8 @@ const unwrap = (job) => ({
   id: job.id,
   payload: job.data,
   progress: job.progress,
+  runAt: job.runAt,
+  delayed: job.delayed,
   reportProgress(progress) {
     this.progress = progress
     return job.reportProgress(progress)
