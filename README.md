@@ -1,10 +1,12 @@
 # Adonis Queue
 
-> Job queue and scheduler for AdonisJS 5
+> Queue for AdonisJS 5
 
-It provides in-memory and Redis based queues to run jobs in
+It provides in-memory and Redis based queues to run jobs
 
-It's relatively basic currently and doesn't support job timeouts, retries etc. Supports extending it, adding jobs to queue, processing them, reporting their status and delaying them.
+Supports running jobs in queue, setting job execution timestamp and status reporting
+
+It's quite basic currently and doesn't support job timeouts, rate limits, parallel or batch processing etc
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -17,10 +19,11 @@ It's relatively basic currently and doesn't support job timeouts, retries etc. S
 - [Usage](#usage)
   - [Define job](#define-job)
   - [Add job to queue](#add-job-to-queue)
-  - [Delaying a job](#delaying-a-job)
+  - [Timing a job](#timing-a-job)
   - [Get job by its ID](#get-job-by-its-id)
   - [Reporting job progress](#reporting-job-progress)
   - [Start the queue](#start-the-queue)
+  - [Retries](#retries)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -130,11 +133,11 @@ let job = Queue.use('signupEmailQueue').add({
 })
 ```
 
-### Delaying a job
+### Timing a job
 
-To add a delayed job to the queue add an options object as a second argument containing `runAt` time in milliseconds when the processing of the job should be started.
+To add a timed job to the queue add an options object as a second argument containing `runAt` time in milliseconds when the processing of the job should be started.
 
-Note: a delayed job will be processed only if the setting `activateDelayedJobs` of the queue is enabled (see [above](#configuration)).
+Note: a timed job will be processed only if the setting `activateDelayedJobs` of the queue is enabled (see [above](#configuration)).
 
 ```ts
 import Queue from '@ioc:Cavai/Adonis-Queue'
@@ -192,3 +195,39 @@ To run queue just run `node ace queue:start`.
 > It's not needed when using only memory queue, since in-memory one will share NodeJS instance with main AdonisJS application
 
 > It's possible to run several queue instances if you want to run jobs in all queues in parallel
+
+
+### Retries
+
+There is no retry support out of box, but you can always wrap your code into `try-catch` block and re-schedule job for processing in `catch` block
+
+```ts
+import Queue from '@ioc:Cavai/Adonis-Queue'
+
+// Need to limit how many times job is can be requeued
+// Otherwise permanently broken jobs will bog down whole queue
+const MAX_RETRIES = 3
+
+Queue.use('signupEmailQueue').process(async (job) => {
+  // Wrap job into try-catch block
+  try {
+    // ... failing code
+  } catch (error) {
+    // Job failed, log error and re-queue it
+    console.error(error)
+
+    // Check if still within retries budget
+    if (job.retries < MAX_RETRIES) {
+      // Add job back to queue with incremented retries counter
+      Queue.use('signupEmailQueue').add({
+        email: 'foo@bar.com',
+        name: 'FooBar',
+        retries: job.retries++
+      }) 
+    } else {
+      // In case retries have been exhausted throw error
+      throw error
+    }
+  }
+})
+```
