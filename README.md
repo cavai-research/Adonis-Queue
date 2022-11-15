@@ -215,6 +215,8 @@ Queue.use('signupEmailQueue').process(async (job) => {
   } catch (error) {
     // Job failed, log error and re-queue it
     console.error(error)
+    
+    let retries = job.payload.retries || 0
 
     // Check if still within retries budget
     if (job.retries < MAX_RETRIES) {
@@ -222,7 +224,7 @@ Queue.use('signupEmailQueue').process(async (job) => {
       Queue.use('signupEmailQueue').add({
         email: 'foo@bar.com',
         name: 'FooBar',
-        retries: job.retries++
+        retries: retries += 1,
       }) 
     } else {
       // In case retries have been exhausted throw error
