@@ -1,9 +1,24 @@
 {
-  "extends": "./node_modules/@adonisjs/mrm-preset/_tsconfig",
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build",
+    ".git"
+  ],
+  "extends": "./node_modules/adonis-preset-ts/tsconfig",
   "compilerOptions": {
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["@types/node", "@adonisjs/core"]
+
+    "outDir": "build",
+    "rootDir": "./",
+    "sourceMap": true,
+
+    "types": [
+      "@adonisjs/core"
+    ]
   }
 }

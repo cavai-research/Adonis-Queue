@@ -1,154 +1,33 @@
 {
   "name": "@cavai/adonis-queue",
-  "version": "1.1.1",
-  "main": "./build/providers/QueueProvider.js",
-  "files": [
-    "build/src",
-    "build/adonis-typings",
-    "build/providers",
-    "build/commands",
-    "build/templates"
-  ],
-  "typings": "./build/adonis-typings/index.d.ts",
-  "scripts": {
-    "mrm": "mrm --preset=@adonisjs/mrm-preset",
-    "lint": "eslint . --ext=.ts",
-    "format": "prettier --write .",
-    "pretest": "npm run lint",
-    "test": "node -r ts-node/register/transpile-only bin/test.ts",
-    "cover": "tsc && nyc --reporter=html --reporter=text npm run test",
-    "clean": "del build",
-    "compile": "npm run lint && npm run clean && tsc",
-    "copyfiles": "copyfiles \"templates/**/*.txt\" build",
-    "build": "npm run compile && npm run copyfiles",
-    "prepublishOnly": "npm run build",
-    "commit": "git-cz",
-    "release": "np --message=\"chore(release): %s\"",
-    "version": "npm run build",
-    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json Cavai/Adonis-Queue"
-  },
-  "devDependencies": {
-    "@adonisjs/core": "^5.1.11",
-    "@adonisjs/mrm-preset": "^5.0.2",
-    "@adonisjs/require-ts": "^2.0.7",
-    "@japa/expect": "^1.1.1",
-    "@japa/run-failed-tests": "^1.0.3",
-    "@japa/runner": "^1.1.3",
-    "@japa/spec-reporter": "^1.1.7",
-    "@poppinss/dev-utils": "^2.0.2",
-    "@types/node": "^17.0.6",
-    "commitizen": "^4.2.4",
-    "copyfiles": "^2.4.1",
-    "cz-conventional-changelog": "^3.3.0",
-    "del-cli": "^4.0.1",
-    "dotenv": "^16.0.0",
-    "eslint": "^8.6.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-adonis": "^2.1.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "github-label-sync": "^2.0.2",
-    "husky": "^7.0.4",
-    "japa": "^4.0.0",
-    "mrm": "^3.0.5",
-    "np": "^7.6.0",
-    "nyc": "^15.1.0",
-    "prettier": "^2.2.1",
-    "ts-node": "^10.5.0",
-    "typescript": "^4.3.5"
-  },
-  "license": "MIT",
-  "adonisjs": {
-    "types": "@cavai/adonis-queue",
-    "providers": [
-      "@cavai/adonis-queue"
-    ],
-    "templates": {
-      "start": [
-        {
-          "src": "jobs.txt",
-          "dest": "jobs"
-        }
-      ],
-      "config": [
-        {
-          "src": "queue.txt",
-          "dest": "queue"
-        }
-      ]
-    },
-    "commands": [
-      "@cavai/adonis-queue/build/commands"
-    ]
-  },
-  "dependencies": {
-    "bee-queue": "^1.4.0"
-  },
-  "mrmConfig": {
-    "core": false,
-    "license": "MIT",
-    "services": [
-      "github-actions"
-    ],
-    "minNodeVersion": "14.15.4",
-    "probotApps": [
-      "stale"
-    ],
-    "runGhActionsOnWindows": true
-  },
-  "eslintConfig": {
-    "extends": [
-      "plugin:adonis/typescriptPackage",
-      "prettier"
-    ],
-    "plugins": [
-      "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "endOfLine": "auto"
-        }
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "build"
-  ],
-  "prettier": {
-    "trailingComma": "es5",
-    "semi": false,
-    "singleQuote": true,
-    "useTabs": false,
-    "quoteProps": "consistent",
-    "bracketSpacing": true,
-    "arrowParens": "always",
-    "printWidth": 100
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
-  "np": {
-    "contents": ".",
-    "anyBranch": false
-  },
-  "nyc": {
-    "include": "src"
-  },
+  "version": "2.0.0-0",
+  "author": "cavai",
   "description": "> Basic AdonisJS queue provider",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cavai-research/Adonis-Queue.git"
   },
-  "author": "cavai",
   "bugs": {
     "url": "https://github.com/cavai-research/Adonis-Queue/issues"
   },
   "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
-  "directories": {
-    "test": "tests"
+  "license": "MIT",
+  "eslintConfig": {
+    "extends": [
+      "plugin:adonis/typescriptPackage"
+    ]
+  },
+  "eslintIgnore": [
+    "build"
+  ],
+  "main": "./build/providers/QueueProvider.js",
+  "devDependencies": {
+    "@adonisjs/core": "^5.9.0",
+    "@types/node": "^18.11.9",
+    "adonis-preset-ts": "^2.1.0",
+    "eslint": "^8.28.0",
+    "eslint-plugin-adonis": "^2.1.1",
+    "typescript": "^4.9.3"
   },
   "keywords": [
     "AdonisJS",

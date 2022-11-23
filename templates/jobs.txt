@@ -1,5 +1,0 @@
-import Queue from '@ioc:Cavai/Adonis-Queue'
-
-Queue.use('exampleQueue').process(async (job) => {
-  console.log('Job is being processed')
-})
