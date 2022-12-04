@@ -1,6 +1,6 @@
 {
   "name": "@cavai/adonis-queue",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "./build/providers/QueueProvider.js",
   "files": [
     "build/src",
