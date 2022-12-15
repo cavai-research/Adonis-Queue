@@ -12,6 +12,24 @@
   },
   "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
   "license": "MIT",
+  "main": "./build/providers/QueueProvider.js",
+  "scripts": {
+    "mrm": "mrm --preset=@adonisjs/mrm-preset",
+    "lint": "eslint . --ext=.ts",
+    "format": "prettier --write .",
+    "pretest": "npm run lint",
+    "test": "node -r ts-node/register/transpile-only bin/test.ts",
+    "cover": "tsc && nyc --reporter=html --reporter=text npm run test",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc",
+    "copyfiles": "copyfiles \"templates/**/*.txt\" build",
+    "build": "npm run compile && npm run copyfiles",
+    "prepublishOnly": "npm run build",
+    "commit": "git-cz",
+    "release": "np --message=\"chore(release): %s\"",
+    "version": "npm run build",
+    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json Cavai/Adonis-Queue"
+  },
   "eslintConfig": {
     "extends": [
       "plugin:adonis/typescriptPackage"
@@ -20,17 +38,52 @@
   "eslintIgnore": [
     "build"
   ],
-  "main": "./build/providers/QueueProvider.js",
   "devDependencies": {
     "@adonisjs/core": "^5.9.0",
+    "@adonisjs/mrm-preset": "^5.0.3",
     "@types/node": "^18.11.9",
     "adonis-preset-ts": "^2.1.0",
+    "copyfiles": "^2.4.1",
+    "del": "^7.0.0",
+    "del-cli": "^5.0.0",
     "eslint": "^8.28.0",
     "eslint-plugin-adonis": "^2.1.1",
     "typescript": "^4.9.3"
   },
   "keywords": [
+    "Adonis",
     "AdonisJS",
+    "Adonis V5",
     "Queue"
-  ]
+  ],
+  "adonisjs": {
+    "types": "@cavai/adonis-queue",
+    "providers": [
+      "@cavai/adonis-queue"
+    ],
+    "templates": {
+      "config": [
+        {
+          "src": "queue.txt",
+          "dest": "queue"
+        }
+      ]
+    },
+    "commands": [
+      "@cavai/adonis-queue/build/commands"
+    ]
+  },
+  "files": [
+    "build/src",
+    "build/adonis-typings",
+    "build/providers",
+    "build/commands",
+    "build/templates"
+  ],
+  "typings": "./build/adonis-typings/index.d.ts",
+  "dependencies": {
+    "@adonisjs/lucid": "^18.3.0",
+    "luxon": "^3.1.1",
+    "superjson": "^1.12.0"
+  }
 }
