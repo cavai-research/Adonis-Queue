@@ -12,7 +12,7 @@
   },
   "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
   "license": "MIT",
-  "main": "./build/providers/QueueProvider.js",
+  "main": "./build/index.js",
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "lint": "eslint . --ext=.ts",
@@ -80,7 +80,6 @@
     "build/commands",
     "build/templates"
   ],
-  "typings": "./build/adonis-typings/index.d.ts",
   "dependencies": {
     "@adonisjs/lucid": "^18.3.0",
     "luxon": "^3.1.1",

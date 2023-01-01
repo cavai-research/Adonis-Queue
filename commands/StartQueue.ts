@@ -17,19 +17,33 @@ export default class StartQueue extends BaseCommand {
   public static description = 'Run the queue'
 
   public async run () {
-    const Queue = this.application.container.use('Cavai/Adonis-Queue')
+    const QueueManager = this.application.container.use('Cavai/Adonis-Queue')
+    const Config = this.application.container.use('Adonis/Core/Config')
 
+    /**
+     * Will keep queue running and checking for jobs infinitly
+     */
     // eslint-disable-next-line no-constant-condition
     while (true) {
+      /**
+       * Just log errors, but don't stop at any
+       * In case of error, will keep queue process alive
+       * Trying to execute next job in-line even after failure
+       */
       try {
-        await Queue.execute()
+        await QueueManager.execute()
       } catch (error) {
-        // Log error and continue
-        console.error(error)
+        this.logger.error(error)
       }
 
-      // Anti self DDoS
-      await new Promise(res => setTimeout(() => res(true), 2000))
+      /**
+       * Wait some time after next job execution
+       * To avoid infinit loop consuming whole thread
+       *
+       * @todo Make it delay from last execution start, not after execution
+       */
+      const pollingDelay = Config.get('queue.database.config.pollingDelay') || 2000
+      await new Promise(res => setTimeout(() => res(true), pollingDelay))
     }
   }
 }

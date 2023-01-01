@@ -1,5 +1,6 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import Queue from '../src/Queue'
+import { QueueManager } from '../src/QueueManager'
+import { BaseJob } from '../src/BaseJob'
 
 export default class QueueProvider {
   public static needsApplication = true
@@ -9,12 +10,13 @@ export default class QueueProvider {
   public register () {
     // Register your own bindings
     this.app.container.singleton('Cavai/Adonis-Queue', () => {
-      return new Queue(this.app.container.use('Adonis/Core/Config').get('queue'), this.app)
+      return new QueueManager(this.app.container.use('Adonis/Core/Config').get('queue'), this.app)
     })
   }
 
   public async boot () {
     // IoC container is ready
+    BaseJob.useQueue(this.app.container.use('Cavai/Adonis-Queue'))
   }
 
   public async ready () {

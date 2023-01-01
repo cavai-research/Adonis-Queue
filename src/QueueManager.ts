@@ -1,34 +1,34 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { LoggerContract } from '@ioc:Adonis/Core/Logger'
 import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import SuperJSON from 'superjson'
 import DatabaseDriver from './Drivers/Database'
 
-export default class Queue {
+export class QueueManager {
   protected database: DatabaseContract
   protected driver: DatabaseDriver
+  protected logger: LoggerContract
 
   constructor (protected config, private app: ApplicationContract) {
     this.database = <DatabaseContract>this.app.container.use('Adonis/Lucid/Database')
-
+    this.logger = app.logger
     if (this.config.driver === 'database') {
       this.driver = new DatabaseDriver(this.config[this.config.driver], this.app)
     }
   }
 
   /**
-   * TODO: Write comment
+   * Executes next job in queue
    */
   public async execute () {
-    // Get one available job
     let job = await this.driver.getNext()
 
     // No job queued, continue with life
     if (!job) {
-      console.log('No job :(')
+      this.logger.debug('Jon jobs in queue')
       return
     }
-
-    console.log('Found job!')
+    this.logger.debug({ job }, 'Execution started')
 
     /**
      * Dynamically import job class on the fly
@@ -36,9 +36,9 @@ export default class Queue {
      * so queue has to be restarted if there has been
      * any change to already imported job class
      */
-    let jobPath = `${this.app.appRoot}/${job.class}`
-    let payload = SuperJSON.parse(job.payload)
-    const jobClass = new ((await import(jobPath)).default)(payload)
+    let payload: any = SuperJSON.parse(job.payload)
+    let jobPath = `${this.app.appRoot}/${payload!.jobsPath}`
+    const jobClass = new ((await import(jobPath)).default)(...payload.data)
 
     /**
      * Wrap handler to try-catch
@@ -48,7 +48,7 @@ export default class Queue {
     try {
       await jobClass.handle()
 
-      // After execution remove job from table
+      // After execution remove job from queue
       await this.driver.remove(job)
     } catch (error) {
       /**
@@ -57,20 +57,20 @@ export default class Queue {
        * Deal with job retries
        * And mark job as failed
        */
-      console.log('JOB FAILED')
-      console.log(error)
+      this.logger.error({ error }, 'Job execution failed')
 
-      // Check if job has depleted retries
-      // if so, then mark it as failed
+      /**
+       * Check if job has depleted retries
+       * if so, then mark it as failed
+       */
       if (job.attempts >= jobClass.retries) {
-        console.log('PERMA FAILED!')
         await this.driver.markFailed(job)
         return
       }
 
-      console.log('RE-SCHEDULED')
       await this.driver.reSchedule(job, jobClass)
     }
+    this.logger.debug({ job }, 'Executed successfully')
   }
 
   /**
