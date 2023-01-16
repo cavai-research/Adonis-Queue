@@ -37,7 +37,7 @@ export class QueueManager {
      * any change to already imported job class
      */
     let payload: any = SuperJSON.parse(job.payload)
-    let jobPath = `${this.app.appRoot}/${payload!.jobsPath}`
+    let jobPath = `${this.app.appRoot}/${payload!.jobPath}`
     const jobClass = new ((await import(jobPath)).default)(...payload.data)
 
     /**

@@ -16,7 +16,7 @@ export class BaseJob {
   /**
    * Filesystem path to job class
    */
-  public static jobsPath: string
+  public static jobPath: string
 
   /**
    * Instance of queue manager
@@ -36,16 +36,16 @@ export class BaseJob {
    * @param data Data to pass to job class instance
    */
   public static async dispatch<T extends typeof BaseJob>(this: T, ...data: ConstructorParameters<T>) {
-    if (!this.jobsPath) {
+    if (!this.jobPath) {
       throw new Error(`jobPath param missing in ${this.name}`)
     }
 
     let payload = {
-      jobsPath: this.jobsPath,
+      jobPath: this.jobPath,
       data,
       version: 'v1',
     }
 
-    await this.queueManager.store(this.jobsPath, payload)
+    await this.queueManager.store(this.jobPath, payload)
   }
 }
