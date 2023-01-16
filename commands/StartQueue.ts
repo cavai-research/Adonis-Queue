@@ -42,7 +42,7 @@ export default class StartQueue extends BaseCommand {
        *
        * @todo Make it delay from last execution start, not after execution
        */
-      const pollingDelay = Config.get('queue.database.config.pollingDelay') || 2000
+      const pollingDelay = Config.get('queue.database.pollingDelay') || 2000
       await new Promise(res => setTimeout(() => res(true), pollingDelay))
     }
   }
