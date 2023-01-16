@@ -47,8 +47,8 @@ Jobs have multiple configurable parameters
 Database driver is currently only driver, others (memory, Redis etc) will be
 added soon.
 
-DB driver offers great persistance (better than Redis), it's good to use both in
-dev and in production environments and powerful enough for most applications.
+It offers great persistance, is good to use both in dev and in production
+environments and powerful enough for most applications.
 
 There's no need for extra deployments to manage queue supportive tooling like
 Redis, Kafka, MemCache etc
