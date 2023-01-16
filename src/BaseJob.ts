@@ -1,6 +1,8 @@
 import { QueueManager } from '../src/QueueManager'
 
 export class BaseJob {
+  constructor (..._: any[]) { }
+
   /**
    * Nr of times job is re-tried before it is marked as failed
    */
