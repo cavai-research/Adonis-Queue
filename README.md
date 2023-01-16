@@ -17,6 +17,10 @@ It provides database based queue to run jobs and works out-of-box with Lucid
 Supports running jobs in queue, retries, scheduling, re-scheduling, basic
 failure tracking and delaying job execution
 
+## Prerequisites
+
+- [Adonis Lucid](https://docs.adonisjs.com/guides/database/introduction) to be installed and configured
+
 ## Installation
 
 - Install package `npm install @cavai/adonis-queue`
