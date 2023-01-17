@@ -7,3 +7,5 @@ declare module '@ioc:Adonis/Core/Application' {
     'Cavai/Adonis-Queue': QueueManager
   }
 }
+
+export default class {}
