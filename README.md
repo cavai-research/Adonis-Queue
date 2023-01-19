@@ -150,6 +150,5 @@ multiple runners picking up same job
 
 ## TODO:
 
-- Add make:job command
 - Add memory queue
 - Add tests

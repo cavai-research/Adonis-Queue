@@ -2,7 +2,7 @@ import { BaseJob } from '@cavai/adonis-queue'
 import Application from '@ioc:Adonis/Core/Application'
 import path from 'path'
 
-export default class ExampleJob extends BaseJob {
+export default class {{ filename }} extends BaseJob {
   /**
    * Nr of times job is re-tried before it is marked as failed
    */

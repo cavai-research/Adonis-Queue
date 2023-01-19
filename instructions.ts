@@ -8,11 +8,11 @@ export default async function instructions (
   sink: typeof sinkStatic
 ) {
   // Copy over ExampleJob.ts
-  new sink.files.TemplateLiteralFile(
+  new sink.files.MustacheFile(
     app.makePath('app/Jobs'),
     'ExampleJob.ts',
     join(__dirname, 'templates/ExampleJob.txt')
-  ).apply({}).commit()
+  ).apply({ name: 'TestJob', filename: 'TestJob', useMustache: true }).commit()
 
   // Copy over Migration
   new sink.files.TemplateLiteralFile(
