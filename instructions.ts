@@ -13,4 +13,11 @@ export default async function instructions (
     'ExampleJob.ts',
     join(__dirname, 'templates/ExampleJob.txt')
   ).apply({}).commit()
+
+  // Copy over Migration
+  new sink.files.TemplateLiteralFile(
+    app.makePath('database/migrations'),
+    `${Date.now()}_queue_migration.ts`,
+    join(__dirname, 'templates/queue_migration.txt')
+  ).apply({}).commit()
 }

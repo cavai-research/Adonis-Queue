@@ -150,7 +150,6 @@ multiple runners picking up same job
 
 ## TODO:
 
-- Add migration files
 - Add make:job command
 - Add memory queue
 - Add tests
