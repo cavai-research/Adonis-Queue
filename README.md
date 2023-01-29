@@ -43,7 +43,7 @@ Jobs have multiple configurable parameters
   `defaults to 0`
 - `retryAfter` - Delay for retries in seconds, so other jobs get chance to run,
   `defaults to 5`sec
-- `jobPath` - Filesystem path to job class, defaults to
+- `classPath` - Filesystem path to job class, defaults to
   `path.relative(Application.appRoot, __filename)`
 
 ### Driver - database
@@ -70,7 +70,7 @@ New job can be made with `node ace make:job JobName`, where `JobName` is name of
 the job, for example `node ace make:job EncodeVideo` which will be made to
 `app/Jobs`
 
-Job can be made or moved manually wherever. Might have to change `jobPath`
+Job can be made or moved manually wherever. Might have to change `classPath`
 accordingly if default dynamic one fails to work
 
 Example job:
@@ -94,7 +94,7 @@ export default class ExampleJob extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  public static jobPath = path.relative(Application.appRoot, __filename);
+  public static classPath = path.relative(Application.appRoot, __filename);
 
   /**
    * Jobs accept additional payload that can be typed for easier usage

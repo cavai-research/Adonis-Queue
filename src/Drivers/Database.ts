@@ -74,7 +74,7 @@ export default class DatabaseDriver {
   public store (path, payload) {
     return this.database.table(this.config.tableName)
       .insert({
-        class: path,
+        class_path: path,
         payload: SuperJSON.serialize(payload),
       })
   }

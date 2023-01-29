@@ -6,7 +6,7 @@ export default class AdonisJobs extends BaseSchema {
   public async up () {
     this.schema.createTable(this.tableName, (table) => {
       table.bigIncrements('id').unsigned()
-      table.string('class').notNullable()
+      table.string('class_path').notNullable()
       table.text('payload').nullable()
 
       table.timestamp('created_at').defaultTo(this.db.knexRawQuery('NOW()'))
