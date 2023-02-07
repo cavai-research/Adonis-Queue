@@ -1,4 +1,4 @@
-import { QueueManager } from '../src/QueueManager'
+import { QueueManager } from './QueueManager'
 
 export class BaseJob {
   constructor (..._: any[]) { }

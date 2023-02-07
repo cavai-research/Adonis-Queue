@@ -5,7 +5,7 @@
 ## Why queue?
 
 When application grows big there might be CPU heavy tasks that should be thrown
-off from main event loop, long running tasks outside of HTTP context or certain
+off from main event loop, long-running tasks outside of HTTP context or certain
 jobs should be executed at certain time, then queueing jobs is perfect solution
 
 Adonis queue provider makes using queues a lot easier and cleaner
@@ -48,10 +48,10 @@ Jobs have multiple configurable parameters
 
 ### Driver - database
 
-Database driver is currently only driver, others (memory, Redis etc) will be
+Database driver is currently only driver, others (memory, Redis etc.) will be
 added soon.
 
-It offers great persistance, is good to use both in dev and in production
+It offers great persistence, is good to use both in dev and in production
 environments and powerful enough for most applications.
 
 There's no need for extra deployments to manage queue supportive tooling like
@@ -114,7 +114,7 @@ export default class ExampleJob extends BaseJob {
 
 ### Dispatching job
 
-Once job class is made and it's ready to be used you can **dispatch** job to
+Once job class is made, and it's ready to be used, you can **dispatch** job to
 queue up for execution
 
 ```js

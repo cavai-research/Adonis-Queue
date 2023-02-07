@@ -21,7 +21,7 @@ export default class StartQueue extends BaseCommand {
     const Config = this.application.container.use('Adonis/Core/Config')
 
     /**
-     * Will keep queue running and checking for jobs infinitly
+     * Will keep queue running and checking for jobs infinitely
      */
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -38,7 +38,7 @@ export default class StartQueue extends BaseCommand {
 
       /**
        * Wait some time after next job execution
-       * To avoid infinit loop consuming whole thread
+       * To avoid infinite loop consuming whole thread
        *
        * @todo Make it delay from last execution start, not after execution
        */
