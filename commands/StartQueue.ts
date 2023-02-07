@@ -36,14 +36,16 @@ export default class StartQueue extends BaseCommand {
         this.logger.error(error)
       }
 
-      /**
-       * Wait some time after next job execution
-       * To avoid infinite loop consuming whole thread
-       *
-       * @todo Make it delay from last execution start, not after execution
-       */
-      const pollingDelay = Config.get('queue.database.pollingDelay') || 2000
-      await new Promise(res => setTimeout(() => res(true), pollingDelay))
+      if (Config.get('queue.driver') === 'database') {
+        /**
+         * Wait some time after next job execution
+         * To avoid infinite loop consuming whole thread
+         *
+         * @todo Make it delay from last execution start, not after execution
+         */
+        const pollingDelay = Config.get('queue.database.pollingDelay') || 2000
+        await new Promise(res => setTimeout(() => res(true), pollingDelay))
+      }
     }
   }
 }
