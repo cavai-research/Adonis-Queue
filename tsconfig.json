@@ -8,6 +8,6 @@
       "@types/node",
       "@adonisjs/core",
       "@adonisjs/lucid"
-    ]
-  }
+    ],
+  },
 }
