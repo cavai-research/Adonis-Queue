@@ -8,15 +8,6 @@ export interface JobRecord {
   failed: boolean
 }
 
-export interface Job {
-  retries: number
-  retryAfter: number
-  classPath: string
-  queueManager: any
-  useQueue(queueManager: any)
-  dispatch()
-}
-
 export abstract class QueueDriver {
   /**
    * Stores job to storage for future processing
