@@ -6,7 +6,7 @@ import { createDatabase, setup, sleep } from '../test-helpers'
 test.group('Database driver', (group) => {
   group.each.setup(setup)
 
-  test('Create instance of driver', async ({ assert, expectTypeOf }) => {
+  test('Create instance of driver', async ({ assert }) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
@@ -18,18 +18,17 @@ test.group('Database driver', (group) => {
     assert.exists(driver.remove)
     assert.exists(driver.reSchedule)
     assert.exists(driver.markFailed)
-
-    // expectTypeOf(driver.store)
-    //   .parameter(0)
-    //   .toEqualTypeOf<string>()
-    // await driver.store('foobar', { foo: 'bar' })
   })
 
-  test('Store job', async ({ assert }) => {
+  test('Store job', async ({ assert, expectTypeOf }) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
     }, db)
+
+    expectTypeOf(driver.store)
+      .parameter(0)
+      .toEqualTypeOf<string>()
 
     await driver.store('test', { foo: 'bar' })
 
