@@ -1,20 +1,26 @@
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import { DateTime } from 'luxon'
 import SuperJSON from 'superjson'
+import { JobRecord, QueueDriver } from '../types'
 
-export default class DatabaseDriver {
-  protected database: DatabaseContract
+export default class DatabaseDriver implements QueueDriver {
+  constructor (protected config: any, private database: DatabaseContract) {}
 
-  constructor (protected config, private app: ApplicationContract) {
-    // Get database instance from IoC container
-    this.database = <DatabaseContract>this.app.container.use('Adonis/Lucid/Database')
+  /**
+   * Store job to database
+   */
+  public async store (path: string, payload: any) {
+    await this.database.table(this.config.tableName)
+      .insert({
+        class_path: path,
+        payload: SuperJSON.serialize(payload),
+      })
   }
 
   /**
-   * Get next job from queue
+   * Get next job from database
    */
-  public getNext () {
+  public getNext (): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
       .where('available_at', '<', DateTime.now().toSQL())
@@ -24,58 +30,46 @@ export default class DatabaseDriver {
   }
 
   /**
-   * Removes job from queue
-   *
-   * @param job Job to be removed
+   * Get job from database by its ID
    */
-  public remove (job) {
+  public getJob (id: number): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
-      .where({ id: job.id })
-      .delete()
+      .where('available_at', '<', DateTime.now().toSQL())
+      .where({ id: id })
+      .first()
   }
 
   /**
-   * Re-schedules job for future execution
-   *
-   * @param job Job instance from database
-   * @param instance Job class instance
+   * Re-schedule job (update attempts and available_at) in Database
    */
-  public reSchedule (job, instance) {
-    return this.database
+  public async reSchedule (job: JobRecord, retryAfter: number) {
+    await this.database
       .from(this.config.tableName)
       .where({ id: job.id })
       .update({
         attempts: job.attempts += 1,
-        available_at: DateTime.now().plus({ seconds: instance.retryAfter }),
+        available_at: DateTime.now().plus({ seconds: retryAfter }),
       })
   }
 
   /**
-   * Marks given job as failed
-   *
-   * @param job Job to be marked as failed
+   * Mark job as failed in database
    */
-  public markFailed (job) {
-    return this.database
+  public async markFailed (id: number) {
+    await this.database
       .from(this.config.tableName)
-      .where({ id: job.id })
-      .update({
-        failed: true,
-      })
+      .where({ id: id })
+      .update({ failed: true })
   }
 
   /**
-   * Stores job to queue for future execution
-   *
-   * @param path Path to class file
-   * @param payload Job payload
+   * Remove job from database
    */
-  public store (path, payload) {
-    return this.database.table(this.config.tableName)
-      .insert({
-        class_path: path,
-        payload: SuperJSON.serialize(payload),
-      })
+  public async remove (id: number): Promise<void> {
+    await this.database
+      .from(this.config.tableName)
+      .where({ id: id })
+      .delete()
   }
 }
