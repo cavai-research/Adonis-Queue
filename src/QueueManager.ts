@@ -1,20 +1,24 @@
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 import { LoggerContract } from '@ioc:Adonis/Core/Logger'
 import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import SuperJSON from 'superjson'
 import DatabaseDriver from './Drivers/Database'
+import { QueueDriverFactory, QueueDriver } from './types'
 
-export class QueueManager {
+export class QueueManager<
+  Mappings extends Record<string, QueueDriverFactory>
+> {
   protected database: DatabaseContract
   protected driver: DatabaseDriver
-  protected logger: LoggerContract
+  // protected logger: LoggerContract
 
-  constructor (protected config, private app: ApplicationContract) {
-    this.database = <DatabaseContract>this.app.container.use('Adonis/Lucid/Database')
-    this.logger = app.logger
-    if (this.config.driver === 'database') {
-      this.driver = new DatabaseDriver(this.config[this.config.driver], this.app)
-    }
+  constructor (
+    protected config: { default: keyof Mappings, queues: Mappings },
+    protected logger: LoggerContract,
+    protected jobsRoot: string
+  ) {}
+
+  public use<K extends keyof Mappings>(queue: K): QueueDriver {
+    return this.config.queues[queue]()
   }
 
   /**
@@ -37,7 +41,7 @@ export class QueueManager {
      * any change to already imported job class
      */
     let payload: any = SuperJSON.parse(job.payload)
-    let jobPath = `${this.app.appRoot}/${job.class_path}`
+    let jobPath = `${this.jobsRoot}/${job.class_path}`
     const jobClass = new ((await import(jobPath)).default)(...payload.data)
 
     /**
@@ -49,7 +53,7 @@ export class QueueManager {
       await jobClass.handle()
 
       // After execution remove job from queue
-      await this.driver.remove(job)
+      await this.driver.remove(job.id)
     } catch (error) {
       /**
        * Handler failed
@@ -64,11 +68,11 @@ export class QueueManager {
        * if so, then mark it as failed
        */
       if (job.attempts >= jobClass.retries) {
-        await this.driver.markFailed(job)
+        await this.driver.markFailed(job.id)
         return
       }
 
-      await this.driver.reSchedule(job, jobClass)
+      await this.driver.reSchedule(job, jobClass.retryAfter)
     }
     this.logger.debug({ job }, 'Executed successfully')
   }

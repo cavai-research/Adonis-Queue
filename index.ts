@@ -1,5 +1,5 @@
-export { BaseJob } from './src/BaseJob'
 import { QueueManager } from './src/QueueManager'
+export { BaseJob } from './src/BaseJob'
 export { QueueManager }
 
 declare module '@ioc:Adonis/Core/Application' {
