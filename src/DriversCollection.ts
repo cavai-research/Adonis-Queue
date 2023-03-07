@@ -1,10 +1,6 @@
 // Check up stuff from https://github.com/adonisjs/core/blob/next/modules/hash/drivers_collection.ts
 
-import DatabaseDriver from './Drivers/Database'
-
-export interface QueueDriverList {
-  db: (config: any) => DatabaseDriver
-}
+import { QueueDriverList } from './types.js'
 
 /**
  * A singleton collection of drivers for the entire lifecycle of

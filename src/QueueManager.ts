@@ -2,7 +2,7 @@ import { LoggerContract } from '@ioc:Adonis/Core/Logger'
 import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import SuperJSON from 'superjson'
 import DatabaseDriver from './Drivers/Database'
-import { QueueDriverFactory, QueueDriver } from './types'
+import { QueueManagerFactory, QueueDriver } from './types'
 
 /**
  * Config for manager looks like this
@@ -17,7 +17,7 @@ import { QueueDriverFactory, QueueDriver } from './types'
  * }
  */
 export class QueueManager<
-  Mappings extends Record<string, QueueDriverFactory>
+  Mappings extends Record<string, QueueManagerFactory>
 > {
   protected database: DatabaseContract
   protected driver: DatabaseDriver

@@ -1,3 +1,5 @@
+import DatabaseDriver from './Drivers/Database.js'
+
 export interface JobRecord {
   id: number
   class_path: string
@@ -55,4 +57,18 @@ export abstract class QueueDriver {
   public abstract remove (id: number): Promise<void>
 }
 
-export type QueueDriverFactory = () => QueueDriver
+/**
+ * Config needed bu the database driver config
+ */
+export type DatabaseDriverConfig = {
+  tableName: string
+}
+
+/**
+ * A list of drivers with a unique name.
+ */
+export interface QueueDriverList {
+  db: (config: DatabaseDriverConfig) => DatabaseDriver
+}
+
+export type QueueManagerFactory = () => QueueDriver

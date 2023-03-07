@@ -1,10 +1,10 @@
 import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import { DateTime } from 'luxon'
 import SuperJSON from 'superjson'
-import { JobRecord, QueueDriver } from '../types'
+import { DatabaseDriverConfig, JobRecord, QueueDriver } from '../types'
 
 export default class DatabaseDriver implements QueueDriver {
-  constructor (protected config: any, private database: DatabaseContract) {}
+  constructor (protected config: DatabaseDriverConfig, private database: DatabaseContract) {}
 
   /**
    * Store job to database

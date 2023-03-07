@@ -1,7 +1,4 @@
-import { defineConfig } from './src/DefineConfig'
 import { QueueManager } from './src/QueueManager'
-export { BaseJob } from './src/BaseJob'
-export { QueueManager }
 
 declare module '@ioc:Adonis/Core/Application' {
   export interface ContainerBindings {
@@ -9,6 +6,6 @@ declare module '@ioc:Adonis/Core/Application' {
   }
 }
 
-export { defineConfig }
-
-export default class {}
+export { QueueManager }
+export { BaseJob } from './src/BaseJob'
+export { defineConfig } from './src/DefineConfig'
