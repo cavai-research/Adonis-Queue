@@ -21,7 +21,7 @@ export class BaseJob {
   /**
    * Instance of queue manager
    */
-  public static queueManager: QueueManager
+  public static queueManager: QueueManager<any>
 
   /**
    * Sets queueManager to current job

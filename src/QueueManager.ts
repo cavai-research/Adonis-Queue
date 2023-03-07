@@ -18,7 +18,7 @@ export class QueueManager<
   ) {}
 
   public use<K extends keyof Mappings>(queue: K): QueueDriver {
-    return this.config.queues[queue]()
+    return this.config.queues[queue](this.config.queues[queue])
   }
 
   /**

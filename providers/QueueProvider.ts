@@ -1,5 +1,5 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
-// import { QueueManager } from '../src/QueueManager'
+import { QueueManager } from '../src/QueueManager'
 import { BaseJob } from '../src/BaseJob'
 import DatabaseDriver from '../src/Drivers/Database'
 import DriversCollection from '../src/DriversCollection'
@@ -13,15 +13,9 @@ export default class QueueProvider {
     // Register your own bindings
     this.app.container.singleton('Cavai/Adonis-Queue', () => {
       // TODO: How to add mappings to here? :thinking:
-      // const queueManager = new QueueManager({
-      //   default: 'db',
-      //   queues: {
-      //     db: () => new DatabaseDriver({
-      //       tableName: 'jobs',
-      //     }, db),
-      //   },
-      // }, this.app.logger, this.app.appRoot)
-      // return queueManager
+      const config = this.app.container.use('Adonis/Core/Config').get('queue')
+      const queueManager = new QueueManager(config, this.app.logger, this.app.appRoot)
+      return queueManager
     })
   }
 
