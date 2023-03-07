@@ -1,7 +1,31 @@
-import { QueueDriverList } from './DriversCollection'
 import { QueueDriverFactory } from './types'
+import { QueueDriverList } from './DriversCollection'
 import DriversCollection from './DriversCollection'
 
+/**
+ * Define config looks like this
+ *
+ * I will take this
+ * {
+ *    default: 'somename',
+ *    queues: {
+ *       somename: {
+ *         driver: 'db',
+ *         table_name: 'sjkadakjs'
+ *      }
+ *    }
+ * }
+ *
+ * And return this
+ * {
+ *    default: 'somename',
+ *    queues: {
+ *       somename: () => new DatabaseDrive({
+ *          table_name: 'sjdasjk',
+ *       })
+ *    }
+ * }
+ */
 export function defineConfig<KnownQueues extends Record<string, {
   [K in keyof QueueDriverList]: { driver: K } & Parameters<QueueDriverList[K]>[0]
 }[keyof QueueDriverList]

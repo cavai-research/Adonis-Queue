@@ -6,6 +6,10 @@ export interface QueueDriverList {
   db: (config: any) => DatabaseDriver
 }
 
+/**
+ * A singleton collection of drivers for the entire lifecycle of
+ * the application.
+ */
 class DriversCollection {
   public list: Partial<QueueDriverList> = {
   }

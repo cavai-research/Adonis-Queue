@@ -55,4 +55,4 @@ export abstract class QueueDriver {
   public abstract remove (id: number): Promise<void>
 }
 
-export type QueueDriverFactory = (config: any) => QueueDriver
+export type QueueDriverFactory = () => QueueDriver

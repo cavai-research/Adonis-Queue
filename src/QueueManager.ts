@@ -4,6 +4,18 @@ import SuperJSON from 'superjson'
 import DatabaseDriver from './Drivers/Database'
 import { QueueDriverFactory, QueueDriver } from './types'
 
+/**
+ * Config for manager looks like this
+ *
+ * {
+ *    default: 'somename',
+ *    queues: {
+ *       somename: () => new DatabaseDrive({
+ *          table_name: 'sjdasjk',
+ *       })
+ *    }
+ * }
+ */
 export class QueueManager<
   Mappings extends Record<string, QueueDriverFactory>
 > {
@@ -18,7 +30,7 @@ export class QueueManager<
   ) {}
 
   public use<K extends keyof Mappings>(queue: K): QueueDriver {
-    return this.config.queues[queue](this.config.queues[queue])
+    return this.config.queues[queue]()
   }
 
   /**
