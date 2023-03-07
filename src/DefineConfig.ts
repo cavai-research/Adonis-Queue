@@ -1,5 +1,4 @@
-import { QueueDriverFactory } from './types'
-import { QueueDriverList } from './DriversCollection'
+import { QueueManagerFactory, QueueDriverList } from './types'
 import DriversCollection from './DriversCollection'
 
 /**
@@ -58,7 +57,7 @@ export function defineConfig<KnownQueues extends Record<string, {
     const queueConfig = config.queues[disk]
     result[disk] = () => DriversCollection.create(queueConfig.driver, queueConfig)
     return result
-  }, {} as { [K in keyof KnownQueues]: QueueDriverFactory })
+  }, {} as { [K in keyof KnownQueues]: QueueManagerFactory })
 
   return {
     default: config.default,
