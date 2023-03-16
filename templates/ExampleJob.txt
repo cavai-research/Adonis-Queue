@@ -1,6 +1,6 @@
 import { BaseJob } from '@cavai/adonis-queue'
 import Application from '@ioc:Adonis/Core/Application'
-import path from 'path'
+import { relative } from 'path'
 
 export default class {{ filename }} extends BaseJob {
   /**
