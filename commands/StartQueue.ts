@@ -17,7 +17,7 @@ export default class StartQueue extends BaseCommand {
   public static description = 'Run the queue'
 
   /**
-   * name of queue to run
+   * Name of queue to run
    */
   @args.string({ description: 'Queue name to run', required: false })
   public name: string
