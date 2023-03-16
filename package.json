@@ -87,9 +87,11 @@
     "build/src",
     "build/adonis-typings",
     "build/providers",
+    "build/services",
     "build/commands",
     "build/templates",
-    "build/instructions.js"
+    "build/instructions.js",
+    "build/index.js"
   ],
   "dependencies": {
     "@adonisjs/lucid": "^18.3.0",
