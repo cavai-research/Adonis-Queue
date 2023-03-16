@@ -1,7 +1,5 @@
 import { LoggerContract } from '@ioc:Adonis/Core/Logger'
-import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import SuperJSON from 'superjson'
-import DatabaseDriver from './Drivers/Database'
 import { QueueManagerFactory, QueueDriver } from './types'
 
 /**
@@ -19,18 +17,54 @@ import { QueueManagerFactory, QueueDriver } from './types'
 export class QueueManager<
   Mappings extends Record<string, QueueManagerFactory>
 > {
-  protected database: DatabaseContract
-  protected driver: DatabaseDriver
-  // protected logger: LoggerContract
+  protected driver: QueueDriver
 
   constructor (
     protected config: { default: keyof Mappings, queues: Mappings },
     protected logger: LoggerContract,
     protected jobsRoot: string
-  ) {}
+  ) {
+    // Setup default driver
+    this.driver = this.use(config.default)
+  }
 
   public use<K extends keyof Mappings>(queue: K): QueueDriver {
+    if (!this.config.queues[queue]) {
+      throw Error(`Queue not defined: "${String(queue)}"`)
+    }
     return this.config.queues[queue]()
+  }
+
+  /**
+   * Starts up given queue jobs execution
+   *
+   * @param queue Queue name to start
+   */
+  public async start<K extends keyof Mappings>(queue: K) {
+    /**
+     * Just log errors, but don't stop at any
+     * In case of error, will keep queue process alive
+     * Trying to execute next job in-line even after failure
+     */
+    try {
+      if (this.use(queue).pollingDelay) {
+        /**
+         * Will keep queue running and checking for jobs infinitely
+         */
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          await this.execute()
+
+          // Wait before next execution loop
+          await new Promise(res => setTimeout(() => res(true), this.use(queue).pollingDelay))
+        }
+      } else {
+        await this.execute()
+      }
+    } catch (error) {
+      // Check if it's needed in first place
+      this.logger.error(error)
+    }
   }
 
   /**

@@ -11,6 +11,7 @@ test.group('QueueManager', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     const queueManager = new QueueManager({

@@ -10,6 +10,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     assert.exists(driver.store)
@@ -24,6 +25,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     expectTypeOf(driver.store)
@@ -49,6 +51,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     await driver.store('test', {
@@ -72,6 +75,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     let randomPayload = Math.random()
@@ -96,6 +100,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     await driver.store('test', { foo: 'bar' })
@@ -114,6 +119,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     await driver.store('test', { foo: 'bar' })
@@ -138,6 +144,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     await driver.store('test', { foo: 'bar' })
@@ -161,6 +168,7 @@ test.group('Database driver', (group) => {
     const db = createDatabase()
     const driver = new DatabaseDriver({
       tableName: 'jobs',
+      pollingDelay: 500,
     }, db)
 
     await driver.store('test', { foo: 'bar' })

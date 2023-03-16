@@ -12,6 +12,12 @@ export interface JobRecord {
 
 export abstract class QueueDriver {
   /**
+   * Delay in ms how often to check for new jobs
+   * or keep calling execute()
+   */
+  public pollingDelay? = 2000
+
+  /**
    * Stores job to storage for future processing
    *
    * @param path Path to job class
@@ -58,17 +64,18 @@ export abstract class QueueDriver {
 }
 
 /**
- * Config needed bu the database driver config
+ * Config needed by the database driver config
  */
 export type DatabaseDriverConfig = {
   tableName: string
+  pollingDelay: number
 }
 
 /**
  * A list of drivers with a unique name.
  */
 export interface QueueDriverList {
-  db: (config: DatabaseDriverConfig) => DatabaseDriver
+  database: (config: DatabaseDriverConfig) => DatabaseDriver
 }
 
 export type QueueManagerFactory = () => QueueDriver

@@ -4,7 +4,9 @@ import SuperJSON from 'superjson'
 import { DatabaseDriverConfig, JobRecord, QueueDriver } from '../types'
 
 export default class DatabaseDriver implements QueueDriver {
-  constructor (protected config: DatabaseDriverConfig, private database: DatabaseContract) {}
+  constructor (protected config: DatabaseDriverConfig, private database: DatabaseContract) { }
+
+  public pollingDelay = this.config.pollingDelay || 2000
 
   /**
    * Store job to database

@@ -5,8 +5,6 @@ import DatabaseDriver from '../src/Drivers/Database'
 import DriversCollection from '../src/DriversCollection'
 
 export default class QueueProvider {
-  public static needsApplication = true
-
   constructor (protected app: ApplicationContract) { }
 
   public register () {
@@ -21,7 +19,7 @@ export default class QueueProvider {
 
   public async boot () {
     // IoC container is ready
-    DriversCollection.extend('db', (config) => {
+    DriversCollection.extend('database', (config) => {
       return new DatabaseDriver(config, this.app.container.use('Adonis/Lucid/Database'))
     })
 
