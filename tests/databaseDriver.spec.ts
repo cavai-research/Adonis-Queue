@@ -152,7 +152,7 @@ test.group('Database driver', (group) => {
 
     assert.isFalse(nextJob!.failed)
 
-    await driver.markFailed(nextJob!.id)
+    await driver.markFailed(nextJob!)
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNotNull(job)

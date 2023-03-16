@@ -53,7 +53,7 @@ export abstract class QueueDriver {
    *
    * @param id Job ID
    */
-  public abstract markFailed (id: number): Promise<void>
+  public abstract markFailed (job: JobRecord): Promise<void>
 
   /**
    * Removes job from queue

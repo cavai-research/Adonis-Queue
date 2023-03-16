@@ -88,7 +88,8 @@ export class QueueManager<
      */
     let payload: any = SuperJSON.parse(job.payload)
     let jobPath = `${this.jobsRoot}/${job.class_path}`
-    const jobClass = new ((await import(jobPath)).default)(...payload.data)
+    const JobClass = (await import(jobPath)).default
+    const jobClassInstance = new JobClass(...payload.data)
 
     /**
      * Wrap handler to try-catch
@@ -96,29 +97,25 @@ export class QueueManager<
      * Other cases are handled in parent Ace command
      */
     try {
-      await jobClass.handle()
+      job.attempts++
+      await jobClassInstance.handle()
 
       // After execution remove job from queue
       await this.driver.remove(job.id)
     } catch (error) {
-      /**
-       * Handler failed
-       * Log error to logger
-       * Deal with job retries
-       * And mark job as failed
-       */
-      this.logger.error({ error }, 'Job execution failed')
+      this.logger.error(error, 'Job execution failed')
 
       /**
        * Check if job has depleted retries
        * if so, then mark it as failed
        */
-      if (job.attempts >= jobClass.retries) {
-        await this.driver.markFailed(job.id)
+      if (job.attempts >= JobClass.retries) {
+        this.logger.error(`Job ${job.id} failed for last time after ${JobClass.retries} retries`)
+        await this.driver.markFailed(job)
         return
       }
 
-      await this.driver.reSchedule(job, jobClass.retryAfter)
+      await this.driver.reSchedule(job, JobClass.retryAfter)
     }
     this.logger.debug({ job }, 'Executed successfully')
   }

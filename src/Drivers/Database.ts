@@ -50,7 +50,7 @@ export default class DatabaseDriver implements QueueDriver {
       .from(this.config.tableName)
       .where({ id: job.id })
       .update({
-        attempts: job.attempts += 1,
+        attempts: job.attempts,
         available_at: DateTime.now().plus({ seconds: retryAfter }),
       })
   }
@@ -58,11 +58,14 @@ export default class DatabaseDriver implements QueueDriver {
   /**
    * Mark job as failed in database
    */
-  public async markFailed (id: number) {
+  public async markFailed (job: JobRecord) {
     await this.database
       .from(this.config.tableName)
-      .where({ id: id })
-      .update({ failed: true })
+      .where({ id: job.id })
+      .update({
+        failed: true,
+        attempts: job.attempts,
+      })
   }
 
   /**
