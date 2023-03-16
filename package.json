@@ -13,6 +13,7 @@
   "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
   "license": "MIT",
   "main": "./build/index.js",
+  "typings": "./build/index.d.ts",
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "lint": "eslint . --ext=.ts",
