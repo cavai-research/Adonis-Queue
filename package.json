@@ -90,8 +90,8 @@
     "build/services",
     "build/commands",
     "build/templates",
-    "build/instructions.js",
-    "build/index.js"
+    "build/instructions.*",
+    "build/index.*"
   ],
   "dependencies": {
     "@adonisjs/lucid": "^18.3.0",
