@@ -15,7 +15,7 @@ Adonis queue provider makes using queues a lot easier and cleaner
 It provides database based queue to run jobs and works out-of-box with Lucid
 
 Supports running jobs in queue, retries, scheduling, re-scheduling, basic
-failure tracking and delaying job execution
+failure tracking and delaying job execution (public API is WIP)
 
 ## Prerequisites
 
@@ -140,7 +140,10 @@ be accessible with `this.payload.name`
 It's good to start queue as separate process, especially in production
 environment, to not block main event loop
 
-To start queue run `node ace queue:start` and keep it running in the background
+To start (default) queue run `node ace queue:start` and keep it running in the background
+
+Or in case of multiple queues can specify which queue to start by providing Ace
+command a name `node ace queue:start mailQueue`, will start mailQueue
 
 ### Scaling queue
 
@@ -151,4 +154,4 @@ multiple runners picking up same job
 ## TODO:
 
 - Add memory queue
-- Add tests
+- Add more tests
