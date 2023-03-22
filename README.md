@@ -78,7 +78,7 @@ Example job:
 ```ts
 import { BaseJob } from "@cavai/adonis-queue";
 import Application from "@ioc:Adonis/Core/Application";
-import path from "path";
+import { relative } from "path";
 
 export default class ExampleJob extends BaseJob {
   /**
@@ -94,7 +94,7 @@ export default class ExampleJob extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  public static classPath = path.relative(Application.appRoot, __filename);
+  public static classPath = relative(Application.appRoot, __filename);
 
   /**
    * Jobs accept additional payload that can be typed for easier usage

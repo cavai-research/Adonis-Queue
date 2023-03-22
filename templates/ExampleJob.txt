@@ -16,7 +16,7 @@ export default class {{ filename }} extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  public static classPath = path.relative(Application.appRoot, __filename)
+  public static classPath = relative(Application.appRoot, __filename)
 
   /**
    * Jobs accept additional payload that can be typed for easier usage
