@@ -1,7 +1,7 @@
 import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
 import { DateTime } from 'luxon'
 import SuperJSON from 'superjson'
-import { DatabaseDriverConfig, JobRecord, QueueDriver } from '../types'
+import { DatabaseDriverConfig, JobRecord, QueueDriver, StoreOptions } from '../types'
 
 export default class DatabaseDriver implements QueueDriver {
   constructor (protected config: DatabaseDriverConfig, private database: DatabaseContract) { }
@@ -11,11 +11,12 @@ export default class DatabaseDriver implements QueueDriver {
   /**
    * Store job to database
    */
-  public async store (path: string, payload: any) {
+  public async store (path: string, payload: any, options?: StoreOptions) {
     await this.database.table(this.config.tableName)
       .insert({
         class_path: path,
         payload: SuperJSON.serialize(payload),
+        available_at: options?.availableAt || DateTime.now().toSQL(),
       })
   }
 

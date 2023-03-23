@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import { QueueManager } from './QueueManager'
 
 export class BaseJob {
@@ -17,6 +18,11 @@ export class BaseJob {
    * Filesystem path to job class
    */
   public static classPath: string
+
+  /**
+   * After what time job will become available for execution
+   */
+  protected static availableAt?: DateTime
 
   /**
    * Instance of queue manager
@@ -46,6 +52,16 @@ export class BaseJob {
       version: 'v1',
     }
 
-    await this.queueManager.store(this.classPath, payload)
+    await this.queueManager.store(this.classPath, payload, {availableAt: this.availableAt})
+  }
+
+  /**
+   * Delay job execution until given time
+   *
+   * @param time Time after what job will be available for execution
+   */
+  public static delay (time: DateTime) {
+    this.availableAt = time
+    return this
   }
 }

@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import DatabaseDriver from './Drivers/Database.js'
 
 export interface JobRecord {
@@ -8,6 +9,10 @@ export interface JobRecord {
   available_at: Date
   attempts: number
   failed: boolean
+}
+
+export interface StoreOptions {
+  availableAt?: DateTime
 }
 
 export abstract class QueueDriver {
@@ -23,7 +28,7 @@ export abstract class QueueDriver {
    * @param path Path to job class
    * @param payload Additional job payload
    */
-  public abstract store (path: string, payload: any): Promise<void>
+  public abstract store (path: string, payload: any, options?: StoreOptions): Promise<void>
 
   /**
    * Get next job from the queue

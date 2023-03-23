@@ -1,6 +1,6 @@
 import { LoggerContract } from '@ioc:Adonis/Core/Logger'
 import SuperJSON from 'superjson'
-import { QueueManagerFactory, QueueDriver } from './types'
+import { QueueManagerFactory, QueueDriver, StoreOptions } from './types'
 
 /**
  * Config for manager looks like this
@@ -125,8 +125,9 @@ export class QueueManager<
    *
    * @param path Path to class file
    * @param payload Job payload
+   * @param options Store options
    */
-  public async store (path, payload) {
-    return this.driver.store(path, payload)
+  public async store (path, payload, options?: StoreOptions) {
+    return this.driver.store(path, payload, options)
   }
 }
