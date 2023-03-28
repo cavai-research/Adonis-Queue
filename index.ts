@@ -9,5 +9,6 @@ declare module '@ioc:Adonis/Core/Application' {
 export { QueueManager }
 export { BaseJob } from './src/BaseJob'
 export { defineConfig } from './src/DefineConfig'
+export { Dispatcher } from './src/Dispatcher'
 
 export default class {} // Bug in Adonis

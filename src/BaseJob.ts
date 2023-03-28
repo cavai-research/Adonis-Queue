@@ -1,5 +1,4 @@
-import { DateTime } from 'luxon'
-import Dispatcher from './Dispatcher'
+import { Dispatcher } from './Dispatcher'
 import { QueueManager } from './QueueManager'
 
 export class BaseJob {
@@ -21,11 +20,6 @@ export class BaseJob {
   public static classPath: string
 
   /**
-   * After what time job will become available for execution
-   */
-  protected static availableAt?: DateTime
-
-  /**
    * Instance of queue manager
    */
   public static queueManager: QueueManager<any>
@@ -43,6 +37,6 @@ export class BaseJob {
    * @param data Data to pass to job class instance
    */
   public static dispatch<T extends typeof BaseJob>(this: T, ...data: ConstructorParameters<T>) {
-    return new Dispatcher(this.classPath, this.name, this.queueManager, data)
+    return new Dispatcher(this, data)
   }
 }

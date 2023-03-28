@@ -1,8 +1,9 @@
 import { DateTime } from 'luxon'
+import { BaseJob } from './BaseJob'
 
 type DispatcherResult = void
 
-export default class Dispatcher implements Promise<DispatcherResult> {
+export class Dispatcher<T extends typeof BaseJob> implements Promise<DispatcherResult> {
   public then<TResult1 = DispatcherResult, TResult2 = never>(
     onfulfilled?:
       | ((value: DispatcherResult) => TResult1 | PromiseLike<TResult1>)
@@ -32,20 +33,20 @@ export default class Dispatcher implements Promise<DispatcherResult> {
 
   private availableAt: DateTime
 
-  constructor(private classPath, private name, private queueManager, private data) {}
+  constructor(private job: T, private data: ConstructorParameters<T>) {}
 
   public async exec() {
-    if (!this.classPath) {
-      throw new Error(`classPath param missing in ${this.name}`)
+    if (!this.job.classPath) {
+      throw new Error(`classPath param missing in ${this.job.name}`)
     }
 
     let payload = {
-      classPath: this.classPath,
+      classPath: this.job.classPath,
       data: this.data,
       version: 'v1',
     }
 
-    await this.queueManager.store(this.classPath, payload, {
+    await this.job.queueManager.store(this.job.classPath, payload, {
       availableAt: this.availableAt,
     })
   }
