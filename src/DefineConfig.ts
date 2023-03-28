@@ -1,5 +1,5 @@
-import { QueueManagerFactory, QueueDriverList } from "./types";
-import DriversCollection from "./DriversCollection";
+import { QueueManagerFactory, QueueDriverList } from './types'
+import DriversCollection from './DriversCollection'
 
 /**
  * Define config looks like this
@@ -29,9 +29,7 @@ export function defineConfig<
   KnownQueues extends Record<
     string,
     {
-      [K in keyof QueueDriverList]: { driver: K } & Parameters<
-        QueueDriverList[K]
-      >[0];
+      [K in keyof QueueDriverList]: { driver: K } & Parameters<QueueDriverList[K]>[0]
     }[keyof QueueDriverList]
   >
 >(config: { default: keyof KnownQueues; queues: KnownQueues }) {
@@ -39,7 +37,7 @@ export function defineConfig<
    * Queues queues should always be provided
    */
   if (!config.queues) {
-    throw new Error('Missing "queues" property in queue config');
+    throw new Error('Missing "queues" property in queue config')
   }
 
   /**
@@ -50,24 +48,20 @@ export function defineConfig<
       `Missing "queues.${String(
         config.default
       )}" in queue config. It is referenced by the "default" property`
-    );
+    )
   }
 
   /**
    * Converting queues config to a collection that queue manager can use
    */
-  const managerQueues = Object.keys(config.queues).reduce(
-    (result, disk: keyof KnownQueues) => {
-      const queueConfig = config.queues[disk];
-      result[disk] = () =>
-        DriversCollection.create(queueConfig.driver, queueConfig);
-      return result;
-    },
-    {} as { [K in keyof KnownQueues]: QueueManagerFactory }
-  );
+  const managerQueues = Object.keys(config.queues).reduce((result, disk: keyof KnownQueues) => {
+    const queueConfig = config.queues[disk]
+    result[disk] = () => DriversCollection.create(queueConfig.driver, queueConfig)
+    return result
+  }, {} as { [K in keyof KnownQueues]: QueueManagerFactory })
 
   return {
     default: config.default,
     queues: managerQueues,
-  };
+  }
 }

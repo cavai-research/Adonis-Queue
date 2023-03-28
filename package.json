@@ -33,12 +33,34 @@
   },
   "eslintConfig": {
     "extends": [
-      "plugin:adonis/typescriptPackage"
-    ]
+      "plugin:adonis/typescriptPackage",
+      "prettier"
+    ],
+    "plugins": [
+      "prettier"
+    ],
+    "rules": {
+      "prettier/prettier": [
+        "error",
+        {
+          "endOfLine": "auto"
+        }
+      ]
+    }
   },
   "eslintIgnore": [
     "build"
   ],
+  "prettier": {
+    "trailingComma": "es5",
+    "semi": false,
+    "singleQuote": true,
+    "useTabs": false,
+    "quoteProps": "consistent",
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "printWidth": 100
+  },
   "devDependencies": {
     "@adonisjs/core": "^5.9.0",
     "@adonisjs/mrm-preset": "^5.0.3",
@@ -55,7 +77,9 @@
     "del": "^7.0.0",
     "del-cli": "^5.0.0",
     "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-adonis": "^2.1.1",
+    "eslint-plugin-prettier": "^4.2.1",
     "pg": "^8.9.0",
     "prettier": "^2.8.7",
     "ts-node": "^10.9.1",

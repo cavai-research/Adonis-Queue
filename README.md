@@ -76,9 +76,9 @@ accordingly if default dynamic one fails to work
 Example job:
 
 ```ts
-import { BaseJob } from "@cavai/adonis-queue";
-import Application from "@ioc:Adonis/Core/Application";
-import { relative } from "path";
+import { BaseJob } from '@cavai/adonis-queue'
+import Application from '@ioc:Adonis/Core/Application'
+import { relative } from 'path'
 
 export default class ExampleJob extends BaseJob {
   /**
@@ -94,13 +94,13 @@ export default class ExampleJob extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  public static classPath = relative(Application.appRoot, __filename);
+  public static classPath = relative(Application.appRoot, __filename)
 
   /**
    * Jobs accept additional payload that can be typed for easier usage
    */
   constructor(public payload: { name: string; id: number; signup_date: Date }) {
-    super();
+    super()
   }
 
   /**
@@ -119,10 +119,10 @@ queue up for execution
 
 ```js
 // First have to import job we want to queue up
-import MailJob from "App/Jobs/Mails/MailJob";
+import MailJob from 'App/Jobs/Mails/MailJob'
 
 // And then dispatch it with optional payload
-await MailJob.dispatch({ name: "123", id: 123, signup_date: new Date() });
+await MailJob.dispatch({ name: '123', id: 123, signup_date: new Date() })
 ```
 
 Awaiting dispatch does **not** wait for execution, it waits for job to be stored

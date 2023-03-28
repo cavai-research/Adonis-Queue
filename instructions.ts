@@ -1,6 +1,6 @@
-import * as sinkStatic from "@adonisjs/sink";
-import { ApplicationContract } from "@ioc:Adonis/Core/Application";
-import { join } from "path";
+import * as sinkStatic from '@adonisjs/sink'
+import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { join } from 'path'
 
 export default async function instructions(
   _projectRoot: string,
@@ -9,19 +9,19 @@ export default async function instructions(
 ) {
   // Copy over ExampleJob.ts
   new sink.files.MustacheFile(
-    app.makePath("app/Jobs"),
-    "ExampleJob.ts",
-    join(__dirname, "templates/ExampleJob.txt")
+    app.makePath('app/Jobs'),
+    'ExampleJob.ts',
+    join(__dirname, 'templates/ExampleJob.txt')
   )
-    .apply({ name: "TestJob", filename: "TestJob", useMustache: true })
-    .commit();
+    .apply({ name: 'TestJob', filename: 'TestJob', useMustache: true })
+    .commit()
 
   // Copy over Migration
   new sink.files.TemplateLiteralFile(
-    app.makePath("database/migrations"),
+    app.makePath('database/migrations'),
     `${Date.now()}_queue_migration.ts`,
-    join(__dirname, "templates/queue_migration.txt")
+    join(__dirname, 'templates/queue_migration.txt')
   )
     .apply({})
-    .commit();
+    .commit()
 }
