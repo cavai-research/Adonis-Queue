@@ -31,10 +31,16 @@ export class Dispatcher<T extends typeof BaseJob> implements Promise<DispatcherR
     return this.constructor.name
   }
 
+  /**
+   * Set time before what job is not available for execution
+   */
   private availableAt: DateTime
 
   constructor(private job: T, private data: ConstructorParameters<T>) {}
 
+  /**
+   * Execute promise, storing job to storage using defined driver
+   */
   public async exec() {
     if (!this.job.classPath) {
       throw new Error(`classPath param missing in ${this.job.name}`)
