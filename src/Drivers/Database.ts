@@ -1,81 +1,85 @@
-import { DatabaseContract } from '@ioc:Adonis/Lucid/Database'
-import { DateTime } from 'luxon'
-import SuperJSON from 'superjson'
-import { DatabaseDriverConfig, JobRecord, QueueDriver, StoreOptions } from '../types'
+import { DatabaseContract } from "@ioc:Adonis/Lucid/Database";
+import { DateTime } from "luxon";
+import SuperJSON from "superjson";
+import {
+  DatabaseDriverConfig,
+  JobRecord,
+  QueueDriver,
+  StoreOptions,
+} from "../types";
 
 export default class DatabaseDriver implements QueueDriver {
-  constructor (protected config: DatabaseDriverConfig, private database: DatabaseContract) { }
+  constructor(
+    protected config: DatabaseDriverConfig,
+    private database: DatabaseContract
+  ) {}
 
-  public pollingDelay = this.config.pollingDelay || 2000
+  public pollingDelay = this.config.pollingDelay || 2000;
 
   /**
    * Store job to database
    */
-  public async store (path: string, payload: any, options?: StoreOptions) {
-    await this.database.table(this.config.tableName)
-      .insert({
-        class_path: path,
-        payload: SuperJSON.serialize(payload),
-        available_at: options?.availableAt || DateTime.now().toSQL(),
-      })
+  public async store(path: string, payload: any, options?: StoreOptions) {
+    await this.database.table(this.config.tableName).insert({
+      class_path: path,
+      payload: SuperJSON.serialize(payload),
+      available_at: options?.availableAt || DateTime.now().toSQL(),
+    });
   }
 
   /**
    * Get next job from database
    */
-  public getNext (): Promise<JobRecord | null> {
+  public getNext(): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
-      .where('available_at', '<', DateTime.now().toSQL())
+      .where("available_at", "<", DateTime.now().toSQL())
       .where({ failed: false })
       .forUpdate()
-      .first()
+      .first();
   }
 
   /**
    * Get job from database by its ID
    */
-  public getJob (id: number): Promise<JobRecord | null> {
+  public getJob(id: number): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
-      .where('available_at', '<', DateTime.now().toSQL())
+      .where("available_at", "<", DateTime.now().toSQL())
       .where({ id: id })
-      .first()
+      .first();
   }
 
   /**
    * Re-schedule job (update attempts and available_at) in Database
    */
-  public async reSchedule (job: JobRecord, retryAfter: number) {
+  public async reSchedule(job: JobRecord, retryAfter: number) {
     await this.database
       .from(this.config.tableName)
       .where({ id: job.id })
       .update({
         attempts: job.attempts,
         available_at: DateTime.now().plus({ seconds: retryAfter }),
-      })
+      });
   }
 
   /**
    * Mark job as failed in database
    */
-  public async markFailed (job: JobRecord) {
+  public async markFailed(job: JobRecord) {
     await this.database
       .from(this.config.tableName)
       .where({ id: job.id })
       .update({
         failed: true,
         attempts: job.attempts,
-      })
+      });
   }
 
   /**
    * Remove job from database
    */
-  public async remove (id: number): Promise<void> {
-    await this.database
-      .from(this.config.tableName)
-      .where({ id: id })
-      .delete()
+  public async remove(id: number): Promise<void> {
+    await this.database.from(this.config.tableName).where({ id: id }).delete();
   }
 }
