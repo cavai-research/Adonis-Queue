@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import DatabaseDriver from './Drivers/Database.js'
 
 export interface JobRecord {
-  id: number
+  id: number | string
   class_path: string
   payload: any
   created_at: Date
@@ -43,7 +43,7 @@ export abstract class QueueDriver {
    * @param id Job ID
    * @returns Found job or null
    */
-  public abstract getJob(id: number): Promise<JobRecord | null>
+  public abstract getJob(id: number | string): Promise<JobRecord | null>
 
   /**
    * Re-schedule job for later execution
@@ -65,7 +65,7 @@ export abstract class QueueDriver {
    *
    * @param id Job ID
    */
-  public abstract remove(id: number): Promise<void>
+  public abstract remove(id: number | string): Promise<void>
 }
 
 /**

@@ -34,7 +34,7 @@ export default class DatabaseDriver implements QueueDriver {
   /**
    * Get job from database by its ID
    */
-  public getJob(id: number): Promise<JobRecord | null> {
+  public getJob(id: number | string): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
       .where('available_at', '<', DateTime.now().toSQL())
@@ -68,7 +68,7 @@ export default class DatabaseDriver implements QueueDriver {
   /**
    * Remove job from database
    */
-  public async remove(id: number): Promise<void> {
+  public async remove(id: number | string): Promise<void> {
     await this.database.from(this.config.tableName).where({ id: id }).delete()
   }
 }
