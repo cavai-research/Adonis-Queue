@@ -13,6 +13,7 @@ export interface JobRecord {
 
 export interface StoreOptions {
   availableAt?: DateTime
+  [key: string | number | symbol]: any
 }
 
 export abstract class QueueDriver {
@@ -27,45 +28,51 @@ export abstract class QueueDriver {
    *
    * @param path Path to job class
    * @param payload Additional job payload
+   * @param options Additional driver specific options
    */
   public abstract store(path: string, payload: any, options?: StoreOptions): Promise<void>
 
   /**
    * Get next job from the queue
    *
+   * @param options Additional driver specific options
    * @returns Next job or null
    */
-  public abstract getNext(): Promise<JobRecord | null>
+  public abstract getNext(options?: any): Promise<JobRecord | null>
 
   /**
    * Find job by its ID
    *
    * @param id Job ID
+   * @param options Additional driver specific options
    * @returns Found job or null
    */
-  public abstract getJob(id: number | string): Promise<JobRecord | null>
+  public abstract getJob(id: number | string, options?: any): Promise<JobRecord | null>
 
   /**
    * Re-schedule job for later execution
    *
    * @param job Job record
    * @param retryAfter Seconds after what to re-try execution
+   * @param options Additional driver specific options
    */
-  public abstract reSchedule(job: JobRecord, retryAfter: number): Promise<void>
+  public abstract reSchedule(job: JobRecord, retryAfter: number, options?: any): Promise<void>
 
   /**
    * Mark job as failed
    *
    * @param id Job ID
+   * @param options Additional driver specific options
    */
-  public abstract markFailed(job: JobRecord): Promise<void>
+  public abstract markFailed(job: JobRecord, options?: any): Promise<void>
 
   /**
    * Removes job from queue
    *
    * @param id Job ID
+   * @param options Additional driver specific options
    */
-  public abstract remove(id: number | string): Promise<void>
+  public abstract remove(id: number | string, options?: any): Promise<void>
 }
 
 /**
