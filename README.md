@@ -2,6 +2,10 @@
 
 > Queue for AdonisJS 5
 
+NPM: https://www.npmjs.com/package/@cavai/adonis-queue
+
+Github: https://github.com/cavai-research/Adonis-Queue
+
 ## Why queue?
 
 When application grows big there might be CPU heavy tasks that should be thrown
@@ -15,7 +19,7 @@ Adonis queue provider makes using queues a lot easier and cleaner
 It provides database based queue to run jobs and works out-of-box with Lucid
 
 Supports running jobs in queue, retries, scheduling, re-scheduling, basic
-failure tracking and delaying job execution (public API is WIP)
+failure tracking and delaying job execution
 
 ## Prerequisites
 
@@ -42,7 +46,7 @@ Jobs have multiple configurable parameters
 - `retries` - Nr of times job is re-tried before it is marked as failed,
   `defaults to 0`
 - `retryAfter` - Delay for retries in seconds, so other jobs get chance to run,
-  `defaults to 5`sec
+  `defaults to 5` sec
 - `classPath` - Filesystem path to job class, defaults to
   `path.relative(Application.appRoot, __filename)`
 
@@ -57,12 +61,11 @@ environments and powerful enough for most applications.
 There's no need for extra deployments to manage queue supportive tooling like
 Redis, Kafka, MemCache etc
 
-Deployments are easy as just restarting queue to pick up new jobs, since NodeJS
-caches all files to memory
+Deployments are easy as just restarting queue. Since NodeJS caches files to memory it's needed to restart to load in latest job classes from last release
 
 ## Usage
 
-Usage is relatively simple to events
+Usage is relatively similar to events
 
 ### Creating jobs
 
@@ -132,6 +135,24 @@ to queue
 method. They will be added to class instance, so in current example `name` will
 be accessible with `this.payload.name`
 
+### Delaying job
+
+Job execution can be delayed with `.delay(NOT_BEFORE_TIME)`
+
+```ts
+// First have to import job we want to queue up
+import MailJob from 'App/Jobs/Mails/MailJob'
+// Import DateTime from Luxon for easier date management
+import { DateTime } from 'luxon'
+
+// Dispatch job and delay it's execution for one day
+await MailJob.dispatch().delay(DateTime.now().plus({days: 1}))
+
+// You can also specify date as string
+// This job won't execute before given date
+await MailJob.dispatch().delay('2025-02-24 15:30:00')
+```
+
 ### Start the queue
 
 > It's not needed for sync memory queue, since it will use share NodeJS event
@@ -155,3 +176,5 @@ multiple runners picking up same job
 
 - Add memory queue
 - Add more tests
+- Write docs about adding custom drivers
+
