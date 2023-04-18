@@ -28,6 +28,7 @@ export default class DatabaseDriver implements QueueDriver {
       .where('available_at', '<', DateTime.now().toSQL())
       .where({ failed: false })
       .forUpdate()
+      .skipLocked()
       .first()
   }
 
