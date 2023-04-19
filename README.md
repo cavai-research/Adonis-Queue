@@ -172,9 +172,130 @@ To scale queue to multiple runners, just start new instances with
 `node ace queue:start`. Jobs are locked by default, so there's no worry about
 multiple runners picking up same job
 
+### Extending with custom drivers
+
+Let's say we want to have driver for testing that never runs jobs,
+just deletes them as soon as they are dispatched
+
+First off, need to create new queue driver, for that let's create `providers/NeverQueue/NeverQueueDriver.ts`
+
+This driver needs to extend abstract `QueueDriver` to ensure everything works correctly
+
+```ts
+// NeverQueueDriver.ts
+import { QueueDriver } from '@cavai/adonis-queue/build/src/types'
+
+export class NeverQueueDriver extends QueueDriver{
+  /**
+   * Do nothing, NeverQueue will never store any jobs
+   */
+  public async store () {
+    console.log('Stored nothing');
+  }
+
+  /**
+   * Just return null, since there is never going to be job to return
+   */
+  public async getNext () {
+    return null
+  }
+
+  /**
+   * Always return null, since there are no jobs
+   */
+  public async getJob () {
+    return null
+  }
+
+  /**
+   * Keeping on with never having jobs theme
+   */
+  public async reSchedule () { }
+
+  /**
+   * Do nothing
+   */
+  public async markFailed () { }
+
+  /**
+   * Do nothing
+   */
+  public async remove () {}
+}
+```
+
+Now also need to make provider, that loads in this new driver
+
+`node ace make:provider NeverQueue/NeverQueueProvider`
+
+Inside provider `register()` method we are going to register our own driver
+
+```ts
+// NeverQueueProvider.ts
+import { DriversCollection } from '@cavai/adonis-queue'
+import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { NeverQueueDriver } from './NeverQueueDriver'
+
+export default class NeverQueueProvider {
+  constructor (protected app: ApplicationContract) {}
+
+  public register () {
+    // Register your own bindings
+    DriversCollection.extend('never', () => { // TS error, solution below
+      return new NeverQueueDriver()
+    })
+  }
+}
+```
+
+Even tho our new queue is working now and we can configure it to be used inside `config/queue.ts`, we are going to get some TypeScript errors, about `never` queue not acceptable queue
+> Argument of type '"never"' is not assignable to parameter of type '"database"'.ts(2345)
+
+To fix that, need to create TS typings file: `contracts/queue.ts`
+
+```ts
+// contracts/queue.ts
+
+// Importing in new queue
+import { NeverQueueDriver } from '@/providers/NeverQueue/NeverQueueDriver'
+
+declare module '@cavai/adonis-queue' {
+  export interface QueueDriverList {
+    // Appending it to drivers list and naming it 
+    'never': () => NeverQueueDriver
+  }
+}
+```
+
+Now last thing to do is to update config inside `config/queue.ts` adding new queue to there with it's custom driver
+
+```ts
+/**
+ * Queue configuration file, all queue config variables are in here
+ */
+import { defineConfig } from '@cavai/adonis-queue'
+
+export default defineConfig({
+  /**
+   * Which driver to use by default
+   */
+  default: 'neverQueue',
+
+  queues: {
+    database: {
+      ...
+    },
+
+    // Added new custom driver to here
+    neverQueue: {
+      driver: 'never',
+    },
+  },
+})
+```
+
 ## TODO:
 
 - Add memory queue
 - Add more tests
-- Write docs about adding custom drivers
 

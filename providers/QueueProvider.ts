@@ -10,7 +10,6 @@ export default class QueueProvider {
   public register() {
     // Register your own bindings
     this.app.container.singleton('Cavai/Adonis-Queue', () => {
-      // TODO: How to add mappings to here? :thinking:
       const config = this.app.container.use('Adonis/Core/Config').get('queue')
       const queueManager = new QueueManager(config, this.app.logger, this.app.appRoot)
       return queueManager
