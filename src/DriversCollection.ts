@@ -1,6 +1,6 @@
 // Check up stuff from https://github.com/adonisjs/core/blob/next/modules/hash/drivers_collection.ts
 
-import { QueueDriverList } from './types.js'
+import { QueueDriverList } from './types'
 
 /**
  * A singleton collection of drivers for the entire lifecycle of

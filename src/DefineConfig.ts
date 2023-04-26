@@ -1,6 +1,8 @@
 import { QueueManagerFactory, QueueDriverList } from './types'
 import DriversCollection from './DriversCollection'
 
+type GetConfig<T extends any[]> = T extends [] ? {} : T[0]
+
 /**
  * Define config looks like this
  *
@@ -29,7 +31,7 @@ export function defineConfig<
   KnownQueues extends Record<
     string,
     {
-      [K in keyof QueueDriverList]: { driver: K } & Parameters<QueueDriverList[K]>[0]
+      [K in keyof QueueDriverList]: { driver: K } & GetConfig<Parameters<QueueDriverList[K]>>
     }[keyof QueueDriverList]
   >
 >(config: { default: keyof KnownQueues; queues: KnownQueues }) {
