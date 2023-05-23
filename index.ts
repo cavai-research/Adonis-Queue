@@ -15,4 +15,5 @@ export { DriversCollection }
 
 export * from './src/types'
 
-export default class {} // Bug in Adonis
+import QueueProvider from './providers/QueueProvider'
+export default QueueProvider
