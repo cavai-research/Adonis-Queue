@@ -15,7 +15,7 @@ export default class DatabaseDriver implements QueueDriver {
     await this.database.table(this.config.tableName).insert({
       class_path: path,
       payload: SuperJSON.serialize(payload),
-      available_at: options?.availableAt || DateTime.now().toSQL(),
+      available_at: options?.availableAt || DateTime.now().toSQL({ includeOffset: false }),
     })
   }
 
@@ -25,7 +25,7 @@ export default class DatabaseDriver implements QueueDriver {
   public getNext(): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
-      .where('available_at', '<', DateTime.now().toSQL())
+      .where('available_at', '<', DateTime.now().toSQL({ includeOffset: false }))
       .where({ failed: false })
       .forUpdate()
       .skipLocked()
@@ -38,7 +38,7 @@ export default class DatabaseDriver implements QueueDriver {
   public getJob(id: number | string): Promise<JobRecord | null> {
     return this.database
       .from(this.config.tableName)
-      .where('available_at', '<', DateTime.now().toSQL())
+      .where('available_at', '<', DateTime.now().toSQL({ includeOffset: false }))
       .where({ id: id })
       .first()
   }
