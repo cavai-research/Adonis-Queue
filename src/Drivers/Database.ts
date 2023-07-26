@@ -26,7 +26,7 @@ export default class DatabaseDriver implements QueueDriver {
    */
   public async getNext(): Promise<JobRecord | null> {
     this.trx = await this.database.transaction()
-    const job = this.trx
+    const job = await this.trx
       .from(this.config.tableName)
       .where('available_at', '<', DateTime.now().toSQL({ includeOffset: false }))
       .where({ failed: false })
