@@ -30,7 +30,13 @@ export abstract class QueueDriver {
    * @param payload Additional job payload
    * @param options Additional driver specific options
    */
-  public abstract store(path: string, payload: any, options?: StoreOptions): Promise<void>
+  public abstract store(
+    path: string,
+    payload: any,
+    options?: StoreOptions
+  ): Promise<{
+    id: number | string
+  }>
 
   /**
    * Get next job from the queue

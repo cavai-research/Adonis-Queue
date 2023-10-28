@@ -14,11 +14,18 @@ export default class DatabaseDriver implements QueueDriver {
    * Store job to database
    */
   public async store(path: string, payload: any, options?: StoreOptions) {
-    await this.database.table(this.config.tableName).insert({
-      class_path: path,
-      payload: SuperJSON.serialize(payload),
-      available_at: options?.availableAt || DateTime.now().toSQL({ includeOffset: false }),
-    })
+    const job = await this.database
+      .table(this.config.tableName)
+      .insert({
+        class_path: path,
+        payload: SuperJSON.serialize(payload),
+        available_at: options?.availableAt || DateTime.now().toSQL({ includeOffset: false }),
+      })
+      .returning('id')
+
+    return {
+      id: job[0].id,
+    }
   }
 
   /**

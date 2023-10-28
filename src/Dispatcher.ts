@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { BaseJob } from './BaseJob'
 
-type DispatcherResult = void
+type DispatcherResult = { id: number | string }
 
 export class Dispatcher<T extends typeof BaseJob> implements Promise<DispatcherResult> {
   public then<TResult1 = DispatcherResult, TResult2 = never>(
@@ -52,7 +52,7 @@ export class Dispatcher<T extends typeof BaseJob> implements Promise<DispatcherR
       version: 'v1',
     }
 
-    await this.job.queueManager.store(this.job.classPath, payload, {
+    return this.job.queueManager.store(this.job.classPath, payload, {
       availableAt: this.availableAt,
     })
   }
