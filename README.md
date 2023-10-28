@@ -125,7 +125,8 @@ queue up for execution
 import MailJob from 'App/Jobs/Mails/MailJob'
 
 // And then dispatch it with optional payload
-await MailJob.dispatch({ name: '123', id: 123, signup_date: new Date() })
+const job = await MailJob.dispatch({ name: '123', id: 123, signup_date: new Date() })
+console.log(job) // { id: 7902 }
 ```
 
 Awaiting dispatch does **not** wait for execution, it waits for job to be stored
@@ -134,6 +135,8 @@ to queue
 `.dispatch()` accepts payload that will be accessible in job class `handle()`
 method. They will be added to class instance, so in current example `name` will
 be accessible with `this.payload.name`
+
+Job dispatch returns object with job ID, which can be later used for job progress tracking
 
 ### Delaying job
 
@@ -298,4 +301,3 @@ export default defineConfig({
 
 - Add memory queue
 - Add more tests
-
