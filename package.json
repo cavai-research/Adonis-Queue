@@ -1,6 +1,6 @@
 {
   "name": "@cavai/adonis-queue",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "cavai",
   "description": "> Basic AdonisJS queue provider",
   "repository": {
