@@ -1,3 +1,7 @@
+{{{
+  exports({ to: app.configPath('queue.ts') })
+}}}
+
 /**
  * Queue configuration file, all queue config variables are in here
  */
@@ -7,7 +11,7 @@ export default defineConfig({
   /**
    * Which driver to use by default
    */
-  default: 'database',
+  default: '{{redis}}', // Just as example
 
   queues: {
     database: {
@@ -27,4 +31,3 @@ export default defineConfig({
     },
   },
 })
-
