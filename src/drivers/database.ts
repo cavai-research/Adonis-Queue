@@ -31,8 +31,6 @@ export default class DatabaseDriver implements QueueDriver {
    * Store job to database
    */
   async store(path: string, payload: any, options?: StoreOptions): Promise<Job> {
-    console.log(SuperJSON.serialize(payload))
-
     const job: JobRecord[] = await this.database
       .table(this.config.tableName)
       .insert({
@@ -48,7 +46,9 @@ export default class DatabaseDriver implements QueueDriver {
       DateTime.fromSQL(job[0].available_at),
       job[0].attempts,
       job[0].failed,
-      this
+      job[0].class_path,
+      this,
+      SuperJSON.parse(job[0].payload)
     )
   }
 
@@ -67,9 +67,8 @@ export default class DatabaseDriver implements QueueDriver {
 
     if (!job) {
       await this.#trx.commit()
+      return null
     }
-
-    console.log(job)
 
     return new Job(
       job.id,
@@ -77,8 +76,9 @@ export default class DatabaseDriver implements QueueDriver {
       job.available_at,
       job.attempts,
       job.failed,
+      job.class_path,
       this,
-      ...job.payload
+      SuperJSON.parse(job.payload)
     )
   }
 
@@ -86,23 +86,32 @@ export default class DatabaseDriver implements QueueDriver {
    * Get job from database by its ID
    */
   async getJob(id: number | string): Promise<Job | null> {
-    let payload = await this.database
+    let jobRecord = await this.database
       .from(this.config.tableName)
       .where('available_at', '<', DateTime.now().toSQL({ includeOffset: false }))
       .where({ id: id })
       .first()
 
-    if (!payload) {
+    if (!jobRecord) {
       return null
     }
 
-    return new Job(payload, this)
+    return new Job(
+      jobRecord.id,
+      jobRecord.created_at,
+      jobRecord.available_at,
+      jobRecord.attempts,
+      jobRecord.failed,
+      jobRecord.class_path,
+      this,
+      SuperJSON.parse(jobRecord.payload)
+    )
   }
 
   /**
    * Re-schedule job (update attempts and available_at) in Database
    */
-  async reSchedule(job: JobRecord, retryAfter: number) {
+  async reSchedule(job: Job, retryAfter: number) {
     await this.#trx!.from(this.config.tableName)
       .where({ id: job.id })
       .update({
@@ -132,11 +141,7 @@ export default class DatabaseDriver implements QueueDriver {
     await this.#trx!.commit()
   }
 
-  protected esnureTransaction() {
-    if (!this.#trx) {
-      this.logger.warn('Transaction missing, creating new')
-      return this.database.transaction()
-    }
-    return this.#trx
+  async release() {
+    await this.#trx?.commit()
   }
 }

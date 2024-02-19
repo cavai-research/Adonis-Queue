@@ -10,12 +10,14 @@ export class Job {
     public availableAt: DateTime,
     public attempts: number,
     public failed: boolean,
+    public classPath: string,
     public driver: QueueDriver,
+    public payload: any
     // public record: JobRecord,
     // public driver: QueueDriver
     // public config: DatabaseDriverConfig,
     // public trx: TransactionClientContract
-    ..._: any[]
+    // ..._: any[]
   ) {}
 
   /**
@@ -23,25 +25,24 @@ export class Job {
    */
   async reSchedule(retryAfter: number) {
     this.attempts++
-    this.driver.reSchedule(this.record, retryAfter)
+    this.driver.reSchedule(this, retryAfter)
   }
 
   /**
    * Mark job as failed in database
    */
   async markFailed() {
-    this.driver.markFailed(this.record)
+    await this.driver.markFailed(this)
   }
 
   /**
    * Remove job from database
    */
   async remove(): Promise<void> {
-    await this.trx.from(this.config.tableName).where({ id: this.record.id }).delete()
-    await this.trx.commit()
+    await this.driver.remove(this.id)
   }
 
   async release() {
-    await this.trx.commit()
+    await this.driver.release()
   }
 }
