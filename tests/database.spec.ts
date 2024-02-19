@@ -1,37 +1,82 @@
 import { test } from '@japa/runner'
-import SuperJSON from 'superjson'
-import DatabaseDriver from '../src/Drivers/Database'
-import { createDatabase, setup, sleep } from '../test-helpers'
+import DatabaseDriver from '../src/drivers/database.js'
+import { Database } from '@adonisjs/lucid/database'
+import { LoggerFactory } from '@adonisjs/core/factories/logger'
+import { EmitterFactory } from '@adonisjs/core/factories/events'
+import { AppFactory } from '@adonisjs/core/factories/app'
+import { setTimeout } from 'node:timers/promises'
+
+const logger = new LoggerFactory().create()
+const app = new AppFactory().create(new URL('./', import.meta.url))
+const emitter = new EmitterFactory().create(app)
+const db = new Database(
+  {
+    connection: 'pg',
+    connections: {
+      pg: {
+        client: 'pg',
+        connection: {
+          host: 'localhost',
+          user: 'relancer',
+          password: 'relancer',
+          database: 'queue_test',
+        },
+      },
+    },
+  },
+  logger,
+  emitter
+)
+
+async function setup() {
+  // Create DB
+  await db.connection().schema.createTable('jobs', (table) => {
+    table.bigIncrements('id').unsigned()
+    table.string('class_path').notNullable()
+    table.text('payload').nullable()
+
+    table.timestamp('created_at').defaultTo(db.knexRawQuery('NOW()'))
+    table.timestamp('available_at').defaultTo(db.knexRawQuery('NOW()'))
+
+    table.integer('attempts').defaultTo(0)
+    table.boolean('failed').defaultTo(false)
+  })
+
+  return async () => {
+    // Teardown DB
+    await db.connection().schema.dropTable('jobs')
+    await db.manager.closeAll()
+  }
+}
 
 test.group('Database driver', (group) => {
   group.each.setup(setup)
+  group.teardown(async () => {
+    await db.manager.closeAll()
+  })
 
   test('Create instance of driver', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     assert.exists(driver.store)
-    assert.exists(driver.getNext)
     assert.exists(driver.getJob)
-    assert.exists(driver.remove)
-    assert.exists(driver.reSchedule)
-    assert.exists(driver.markFailed)
   })
 
   test('Store job', async ({ assert, expectTypeOf }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     expectTypeOf(driver.store).parameter(0).toEqualTypeOf<string>()
@@ -39,6 +84,7 @@ test.group('Database driver', (group) => {
     await driver.store('test', { foo: 'bar' })
 
     let job = await db.from('jobs').first()
+
     assert.isNotNull(job)
     assert.containsSubset(job, {
       attempts: 0,
@@ -46,46 +92,42 @@ test.group('Database driver', (group) => {
       failed: false,
     })
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
     await db.manager.closeAll()
   })
 
   test('Get next job', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
-    await driver.store('test', {
-      foo: 'bar',
-    })
+    await driver.store('test', ['foo', { bar: 'baz' }])
+
     const job = await driver.getNext()
 
     assert.isNotNull(job)
     assert.containsSubset(job, {
       attempts: 0,
-      class_path: 'test',
+      classPath: 'test',
       failed: false,
     })
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
+    // Job that's gotten with "getNext" must be released back to queue
+    await job!.release()
   })
 
   test('Payload serialization is OK', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     let randomPayload = Math.random()
@@ -93,118 +135,131 @@ test.group('Database driver', (group) => {
       foo: 'bar',
       randomPayload,
     })
-    let nextJob = await driver.getNext()
 
-    const payload = SuperJSON.parse(nextJob!.payload)
-    assert.deepEqual(payload, {
+    let job = await driver.getNext()
+    assert.isNotNull(job)
+
+    assert.deepEqual(job!.payload, {
       foo: 'bar',
       randomPayload,
     })
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
+    await job?.release()
   })
 
   test('Get job by ID', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     await driver.store('test', { foo: 'bar' })
+    // Get next job
     let nextJob = await driver.getNext()
+    assert.isNotNull(nextJob)
+    await nextJob?.release()
 
+    // Use that same job ID to get it by ID
     const job = await driver.getJob(nextJob!.id)
     assert.isNotNull(job)
-    assert.isNotNull(job!.id)
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
+    assert.isNotNull(job)
+    assert.deepEqual(job!.payload, nextJob!.payload)
+    assert.deepEqual(job!.id, nextJob!.id)
+  })
+
+  test('Get non existing job', async ({ assert }) => {
+    const driver = new DatabaseDriver(
+      {
+        tableName: 'jobs',
+        pollingDelay: 500,
+      },
+      db,
+      logger
+    )
+
+    // Get next job
+    let nextJob = await driver.getNext()
+    assert.isNull(nextJob)
+    await nextJob?.release()
   })
 
   test('Re schedule job', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     await driver.store('test', { foo: 'bar' })
     let nextJob = await driver.getNext()
+    assert.isNotNull(nextJob)
 
     assert.equal(nextJob!.attempts, 0)
+    await nextJob!.reSchedule(2)
 
-    await driver.reSchedule(nextJob!, 2)
-
-    await sleep(3)
+    await setTimeout(3000)
 
     const reScheduled = await driver.getNext()
+    assert.isNotNull(reScheduled)
+
+    await reScheduled!.release()
     assert.isNotNull(reScheduled)
     assert.equal(reScheduled!.attempts, 1)
 
     // Test doesn't finish without manual close
     // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
+    // await db.manager.closeAll()
   }).timeout(5000)
 
   test('Mark job as failed', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     await driver.store('test', { foo: 'bar' })
     let nextJob = await driver.getNext()
-
+    assert.isNotNull(nextJob)
     assert.isFalse(nextJob!.failed)
 
-    await driver.markFailed(nextJob!)
+    await nextJob!.markFailed()
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNotNull(job)
+
     assert.isNotNull(job!.id)
     assert.isTrue(job!.failed)
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
   })
 
   test('Delete job', async ({ assert }) => {
-    const db = createDatabase()
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
         pollingDelay: 500,
       },
-      db
+      db,
+      logger
     )
 
     await driver.store('test', { foo: 'bar' })
     let nextJob = await driver.getNext()
-
+    assert.isNotNull(nextJob)
     assert.isFalse(nextJob!.failed)
-
-    await driver.remove(nextJob!.id)
+    await nextJob!.remove()
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNull(job)
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
   })
 })

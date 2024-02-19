@@ -1,12 +1,13 @@
 import { DateTime } from 'luxon'
-import DatabaseDriver from './Drivers/Database.js'
+import DatabaseDriver from './drivers/database.js'
+import type { Job } from './job.js'
 
 export interface JobRecord {
   id: number | string
   class_path: string
   payload: any
-  created_at: Date
-  available_at: Date
+  created_at: string
+  available_at: string
   attempts: number
   failed: boolean
 }
@@ -21,7 +22,7 @@ export abstract class QueueDriver {
    * Delay in ms how often to check for new jobs
    * or keep calling execute()
    */
-  public pollingDelay? = 2000
+  pollingDelay? = 2000
 
   /**
    * Stores job to storage for future processing
@@ -30,13 +31,7 @@ export abstract class QueueDriver {
    * @param payload Additional job payload
    * @param options Additional driver specific options
    */
-  public abstract store(
-    path: string,
-    payload: any,
-    options?: StoreOptions
-  ): Promise<{
-    id: number | string
-  }>
+  abstract store(path: string, payload: any, options?: StoreOptions): Promise<Job>
 
   /**
    * Get next job from the queue
@@ -44,7 +39,7 @@ export abstract class QueueDriver {
    * @param options Additional driver specific options
    * @returns Next job or null
    */
-  public abstract getNext(options?: any): Promise<JobRecord | null>
+  abstract getNext(options?: any): Promise<Job | null>
 
   /**
    * Find job by its ID
@@ -53,7 +48,7 @@ export abstract class QueueDriver {
    * @param options Additional driver specific options
    * @returns Found job or null
    */
-  public abstract getJob(id: number | string, options?: any): Promise<JobRecord | null>
+  abstract getJob(id: number | string, options?: any): Promise<Job | null>
 
   /**
    * Re-schedule job for later execution
@@ -62,7 +57,7 @@ export abstract class QueueDriver {
    * @param retryAfter Seconds after what to re-try execution
    * @param options Additional driver specific options
    */
-  public abstract reSchedule(job: JobRecord, retryAfter: number, options?: any): Promise<void>
+  abstract reSchedule(job: JobRecord, retryAfter: number, options?: any): Promise<void>
 
   /**
    * Mark job as failed
@@ -70,7 +65,7 @@ export abstract class QueueDriver {
    * @param id Job ID
    * @param options Additional driver specific options
    */
-  public abstract markFailed(job: JobRecord, options?: any): Promise<void>
+  abstract markFailed(job: JobRecord, options?: any): Promise<void>
 
   /**
    * Removes job from queue
@@ -78,7 +73,7 @@ export abstract class QueueDriver {
    * @param id Job ID
    * @param options Additional driver specific options
    */
-  public abstract remove(id: number | string, options?: any): Promise<void>
+  abstract remove(id: number | string, options?: any): Promise<void>
 }
 
 /**
