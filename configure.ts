@@ -23,7 +23,7 @@ export async function configure(_command: ConfigureCommand) {
     rcFile.addProvider('@cavai/adonis-queue/queue_provider')
   })
 
-  await mod.makeUsingStub(stubsRoot, 'config/queue.stub', { redis: true })
+  await mod.makeUsingStub(stubsRoot, 'config/queue.stub', { default: 'database' })
 
   // Register / copy metafiles, configs etc
 }

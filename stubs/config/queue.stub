@@ -11,7 +11,7 @@ export default defineConfig({
   /**
    * Which driver to use by default
    */
-  default: '{{redis}}', // Just as example
+  default: '{{default}}', // Just as example
 
   queues: {
     database: {
