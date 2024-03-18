@@ -17,9 +17,9 @@ const db = new Database(
         client: 'pg',
         connection: {
           host: 'localhost',
-          user: 'relancer',
-          password: 'relancer',
-          database: 'queue_test',
+          user: 'postgres',
+          password: 'postgres',
+          database: 'postgres',
         },
       },
     },

@@ -31,7 +31,7 @@ export abstract class QueueDriver {
    * @param payload Additional job payload
    * @param options Additional driver specific options
    */
-  abstract store(path: string, payload: any, options?: StoreOptions): Promise<Job>
+  abstract store(path: string, payload: any, options?: StoreOptions): Promise<JobRecord>
 
   /**
    * Get next job from the queue
@@ -57,7 +57,7 @@ export abstract class QueueDriver {
    * @param retryAfter Seconds after what to re-try execution
    * @param options Additional driver specific options
    */
-  abstract reSchedule(job: JobRecord, retryAfter: number, options?: any): Promise<void>
+  abstract reSchedule(job: Job, retryAfter: number, options?: any): Promise<void>
 
   /**
    * Mark job as failed
@@ -65,7 +65,7 @@ export abstract class QueueDriver {
    * @param id Job ID
    * @param options Additional driver specific options
    */
-  abstract markFailed(job: JobRecord, options?: any): Promise<void>
+  abstract markFailed(job: Job, options?: any): Promise<void>
 
   /**
    * Removes job from queue

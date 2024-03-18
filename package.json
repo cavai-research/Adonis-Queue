@@ -33,7 +33,9 @@
   "exports": {
     ".": "./build/index.js",
     "./types": "./build/src/types.js",
-    "./queue_provider": "./build/src/providers/queue_provider.js"
+    "./queue_provider": "./build/providers/queue_provider.js",
+    "./queue": "./build/services/queue.js",
+    "./defineConfig": "./build/src/define_config.js"
   },
   "scripts": {
     "clean": "del-cli build",

@@ -30,7 +30,7 @@ export default class DatabaseDriver implements QueueDriver {
   /**
    * Store job to database
    */
-  async store(path: string, payload: any, options?: StoreOptions): Promise<Job> {
+  async store(path: string, payload: any, options?: StoreOptions): Promise<JobRecord> {
     const job: JobRecord[] = await this.database
       .table(this.config.tableName)
       .insert({
@@ -40,16 +40,10 @@ export default class DatabaseDriver implements QueueDriver {
       })
       .returning('*')
 
-    return new Job(
-      job[0].id,
-      DateTime.fromSQL(job[0].created_at),
-      DateTime.fromSQL(job[0].available_at),
-      job[0].attempts,
-      job[0].failed,
-      job[0].class_path,
-      this,
-      SuperJSON.parse(job[0].payload)
-    )
+    return {
+      ...job[0],
+      payload,
+    }
   }
 
   /**
@@ -124,7 +118,7 @@ export default class DatabaseDriver implements QueueDriver {
   /**
    * Mark job as failed in database
    */
-  async markFailed(job: JobRecord) {
+  async markFailed(job: Job) {
     await this.#trx!.from(this.config.tableName).where({ id: job.id }).update({
       failed: true,
       attempts: job.attempts,
