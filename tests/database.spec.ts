@@ -66,7 +66,12 @@ test.group('Database driver', (group) => {
     )
 
     assert.exists(driver.store)
+    assert.exists(driver.getNext)
     assert.exists(driver.getJob)
+    assert.exists(driver.reSchedule)
+    assert.exists(driver.markFailed)
+    assert.exists(driver.remove)
+    assert.exists(driver.release)
   })
 
   test('Store job', async ({ assert, expectTypeOf }) => {
@@ -86,13 +91,16 @@ test.group('Database driver', (group) => {
     let job = await db.from('jobs').first()
 
     assert.isNotNull(job)
+
+    assert.exists(job.id)
+    assert.exists(job.created_at)
+    assert.exists(job.available_at)
     assert.containsSubset(job, {
       attempts: 0,
       class_path: 'test',
       failed: false,
+      payload: '{"json":{"foo":"bar"}}',
     })
-
-    await db.manager.closeAll()
   })
 
   test('Get next job', async ({ assert }) => {
@@ -108,43 +116,19 @@ test.group('Database driver', (group) => {
     await driver.store('test', ['foo', { bar: 'baz' }])
 
     const job = await driver.getNext()
+    // Job that's gotten with "getNext" must be executed or released back to queue
+    await driver.release()
 
     assert.isNotNull(job)
+    assert.exists(job!.id)
+    assert.exists(job!.created_at)
+    assert.exists(job!.available_at)
     assert.containsSubset(job, {
       attempts: 0,
-      classPath: 'test',
+      class_path: 'test',
       failed: false,
+      payload: '{"json":["foo",{"bar":"baz"}]}',
     })
-
-    // Job that's gotten with "getNext" must be released back to queue
-    await job!.release()
-  })
-
-  test('Payload serialization is OK', async ({ assert }) => {
-    const driver = new DatabaseDriver(
-      {
-        tableName: 'jobs',
-        pollingDelay: 500,
-      },
-      db,
-      logger
-    )
-
-    let randomPayload = Math.random()
-    await driver.store('test', {
-      foo: 'bar',
-      randomPayload,
-    })
-
-    let job = await driver.getNext()
-    assert.isNotNull(job)
-
-    assert.deepEqual(job!.payload, {
-      foo: 'bar',
-      randomPayload,
-    })
-
-    await job?.release()
   })
 
   test('Get job by ID', async ({ assert }) => {
@@ -161,13 +145,12 @@ test.group('Database driver', (group) => {
     // Get next job
     let nextJob = await driver.getNext()
     assert.isNotNull(nextJob)
-    await nextJob?.release()
+    await driver.release()
 
     // Use that same job ID to get it by ID
     const job = await driver.getJob(nextJob!.id)
     assert.isNotNull(job)
 
-    assert.isNotNull(job)
     assert.deepEqual(job!.payload, nextJob!.payload)
     assert.deepEqual(job!.id, nextJob!.id)
   })
@@ -185,7 +168,9 @@ test.group('Database driver', (group) => {
     // Get next job
     let nextJob = await driver.getNext()
     assert.isNull(nextJob)
-    await nextJob?.release()
+    // No need to release, if there's no job
+    // Since there's no job to be executed
+    // await driver.release()
   })
 
   test('Re schedule job', async ({ assert }) => {
@@ -203,20 +188,17 @@ test.group('Database driver', (group) => {
     assert.isNotNull(nextJob)
 
     assert.equal(nextJob!.attempts, 0)
-    await nextJob!.reSchedule(2)
+    nextJob!.attempts++
+    await driver.reSchedule(nextJob!, 2)
 
     await setTimeout(3000)
 
     const reScheduled = await driver.getNext()
     assert.isNotNull(reScheduled)
 
-    await reScheduled!.release()
+    await driver.release()
     assert.isNotNull(reScheduled)
     assert.equal(reScheduled!.attempts, 1)
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    // await db.manager.closeAll()
   }).timeout(5000)
 
   test('Mark job as failed', async ({ assert }) => {
@@ -234,7 +216,7 @@ test.group('Database driver', (group) => {
     assert.isNotNull(nextJob)
     assert.isFalse(nextJob!.failed)
 
-    await nextJob!.markFailed()
+    await driver.markFailed(nextJob!)
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNotNull(job)
@@ -257,7 +239,7 @@ test.group('Database driver', (group) => {
     let nextJob = await driver.getNext()
     assert.isNotNull(nextJob)
     assert.isFalse(nextJob!.failed)
-    await nextJob!.remove()
+    await driver.remove(nextJob!.id)
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNull(job)
