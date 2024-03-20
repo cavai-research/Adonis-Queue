@@ -1,6 +1,5 @@
 import { DateTime } from 'luxon'
 import DatabaseDriver from './drivers/database.js'
-import type { Job } from './job.js'
 
 export interface JobRecord {
   id: number | string
@@ -10,6 +9,11 @@ export interface JobRecord {
   available_at: string
   attempts: number
   failed: boolean
+}
+
+export interface JobMeta {
+  id: JobRecord['id']
+  attempts: JobRecord['attempts']
 }
 
 export interface StoreOptions {
@@ -39,7 +43,7 @@ export abstract class QueueDriver {
    * @param options Additional driver specific options
    * @returns Next job or null
    */
-  abstract getNext(options?: any): Promise<Job | null>
+  abstract getNext(options?: any): Promise<JobRecord | null>
 
   /**
    * Find job by its ID
@@ -48,7 +52,7 @@ export abstract class QueueDriver {
    * @param options Additional driver specific options
    * @returns Found job or null
    */
-  abstract getJob(id: number | string, options?: any): Promise<Job | null>
+  abstract getJob(id: number | string, options?: any): Promise<JobRecord | null>
 
   /**
    * Re-schedule job for later execution
@@ -57,7 +61,7 @@ export abstract class QueueDriver {
    * @param retryAfter Seconds after what to re-try execution
    * @param options Additional driver specific options
    */
-  abstract reSchedule(job: Job, retryAfter: number, options?: any): Promise<void>
+  abstract reSchedule(job: JobRecord, retryAfter: number, options?: any): Promise<void>
 
   /**
    * Mark job as failed
@@ -65,7 +69,7 @@ export abstract class QueueDriver {
    * @param id Job ID
    * @param options Additional driver specific options
    */
-  abstract markFailed(job: Job, options?: any): Promise<void>
+  abstract markFailed(job: JobRecord, options?: any): Promise<void>
 
   /**
    * Removes job from queue
