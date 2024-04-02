@@ -19,6 +19,7 @@ export default class QueueProvider {
         )
       }
 
+      // TODO: Move app/jobs to config
       return new QueueManager(config, logger, 'app/jobs')
     })
   }
