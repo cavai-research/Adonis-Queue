@@ -21,6 +21,7 @@ export async function configure(_command: ConfigureCommand) {
   mod.updateRcFile((rcFile) => {
     // Points to exports in package.json
     rcFile.addProvider('@cavai/adonis-queue/queue_provider')
+    rcFile.addCommand('@cavai/adonis-queue/commands')
   })
 
   await mod.makeUsingStub(stubsRoot, 'config/queue.stub', { default: 'database' })
