@@ -3,7 +3,7 @@ import { TransactionClientContract } from '@adonisjs/lucid/types/database'
 import type { Database } from '@adonisjs/lucid/database'
 import { DateTime } from 'luxon'
 import SuperJSON from 'superjson'
-import { DatabaseDriverConfig, JobMeta, JobRecord, QueueDriver, StoreOptions } from '../types.js'
+import { DatabaseDriverConfig, JobRecord, QueueDriver, StoreOptions } from '../types.js'
 import type { Logger } from '@adonisjs/core/logger'
 
 export default class DatabaseDriver implements QueueDriver {
