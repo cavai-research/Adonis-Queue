@@ -1,16 +1,25 @@
 import { QueueManager } from '../src/queue_manager.js'
-// import { BaseJob } from '../src/BaseJob'
-// import DatabaseDriver from '../src/Drivers/Database'
-// import DriversCollection from '../src/DriversCollection'
 import type { ApplicationService } from '@adonisjs/core/types'
+import { configProvider } from '@adonisjs/core'
+import { RuntimeException } from '@poppinss/utils'
 
 export default class QueueProvider {
   constructor(protected app: ApplicationService) {}
 
   register() {
-    this.app.container.singleton(QueueManager, () => {
-      let conf = this.app.config.get('queue')
-      return new QueueManager(conf)
+    this.app.container.singleton(QueueManager, async (resolver) => {
+      const queueConfigProvider = await this.app.config.get('queue')
+      const config = await configProvider.resolve<any>(this.app, queueConfigProvider)
+
+      let logger = await resolver.make('logger')
+
+      if (!config) {
+        throw new RuntimeException(
+          'Invalid "config/queue.ts" file. Make sure you are using the "defineConfig" method'
+        )
+      }
+
+      return new QueueManager(config, logger, 'app/jobs')
     })
   }
 
