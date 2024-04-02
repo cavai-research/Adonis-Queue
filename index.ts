@@ -8,4 +8,4 @@
 */
 
 export { configure } from './configure.js'
-export { Queue } from './src/queue_manager.js'
+export { QueueManager } from './src/queue_manager.js'
