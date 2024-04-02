@@ -55,7 +55,6 @@ export const drivers: {
       const { DatabaseDriver } = await import('./drivers/database.js')
       const logger = await app.container.make('logger')
       const database = await app.container.make('lucid.db')
-      console.log('DB', DatabaseDriver)
 
       return () => new DatabaseDriver(config, database, logger)
     })

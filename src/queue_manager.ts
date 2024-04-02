@@ -27,6 +27,9 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
   }
 
   use<K extends keyof Mappings>(queue: K): QueueDriver {
+    // console.log(this.config.queues)
+    // console.log(queue)
+
     if (!this.config.queues[queue]) {
       throw Error(`Queue not defined: "${String(queue)}"`)
     }
