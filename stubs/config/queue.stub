@@ -5,13 +5,13 @@
 /**
  * Queue configuration file, all queue config variables are in here
  */
-import { defineConfig } from '@cavai/adonis-queue/build'
+import { defineConfig } from '@cavai/adonis-queue/define_config'
 
 export default defineConfig({
   /**
    * Which driver to use by default
    */
-  default: '{{default}}', // Just as example
+  default: '{{queue}}',
 
   queues: {
     database: {

@@ -1,0 +1,41 @@
+{{{
+  exports({ to: path })
+}}}
+
+import { BaseJob } from '@cavai/adonis-queue/'
+import app from '@adonisjs/core/services/app'
+import { relative } from 'node:path'
+
+export default class {{ filename }} extends BaseJob {
+ /**
+   * Nr of times job is re-tried before it is marked as failed
+   */
+  // public static retries = 0
+
+  /**
+   * Delay for retries in seconds, so other jobs get chance to run
+   */
+  // public static retryAfter = 5
+
+  /**
+   * Filesystem path to job class
+   */
+  static classPath = relative(app.appRoot.pathname, import.meta.filename)
+
+  /**
+   * Jobs accept additional payload that can be typed for easier usage
+   */
+  constructor(payload = { id, foobar }) {
+    super()
+  }
+
+  /**
+   *  Job handler function, write your own code in here
+   */
+  async handle() {
+    this.reSchedule()
+    this.id
+    this.attempts
+    // Code...
+  }
+}
