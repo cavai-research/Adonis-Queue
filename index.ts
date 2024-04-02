@@ -9,3 +9,4 @@
 
 export { configure } from './configure.js'
 export { QueueManager } from './src/queue_manager.js'
+export { defineConfig, drivers } from './src/define_config.js'
