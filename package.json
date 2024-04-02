@@ -51,7 +51,8 @@
     "postbuild": "npm run copy:templates",
     "release": "np",
     "version": "npm run build",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "fullbuild": "npm run build; npm run postbuild; npx adonis-kit index build/commands"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.0.0",
