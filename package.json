@@ -24,16 +24,17 @@
   "main": "build/index.js",
   "type": "module",
   "files": [
-    "build/src",
-    "build/providers",
-    "build/stubs",
-    "build/index.d.ts",
-    "build/index.js"
+    "build",
+    "!build/bin",
+    "!build/tests"
   ],
   "exports": {
     ".": "./build/index.js",
     "./types": "./build/src/types.js",
-    "./queue_provider": "./build/src/providers/queue_provider.js"
+    "./commands": "./build/commands/main.js",
+    "./queue_provider": "./build/providers/queue_provider.js",
+    "./queue": "./build/services/queue.js",
+    "./define_config": "./build/src/define_config.js"
   },
   "scripts": {
     "clean": "del-cli build",
@@ -49,7 +50,8 @@
     "postbuild": "npm run copy:templates",
     "release": "np",
     "version": "npm run build",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "fullbuild": "npm run build; npm run postbuild; npx adonis-kit index build/commands"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^7.0.0",
