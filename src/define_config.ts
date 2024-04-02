@@ -1,72 +1,65 @@
-import { QueueManagerFactory, QueueDriverList } from './types.js'
-import DriversCollection from './drivers_collection.js'
-
-type GetConfig<T extends any[]> = T extends [] ? {} : T[0]
+import { configProvider } from '@adonisjs/core'
+import type { ConfigProvider } from '@adonisjs/core/types'
+import { DatabaseDriverConfig, QueueManagerFactory } from './types.js'
+import DatabaseDriver from './drivers/database.js'
+import { Database } from '@adonisjs/lucid/database'
+import { Logger } from '@adonisjs/core/logger'
 
 /**
- * Define config looks like this
- *
- * I will take this
- * {
- *    default: 'somename',
- *    queues: {
- *       somename: {
- *         driver: 'db',
- *         table_name: 'sjkadakjs'
- *      }
- *    }
- * }
- *
- * And return this
- * {
- *    default: 'somename',
- *    queues: {
- *       somename: () => new DatabaseDrive({
- *          table_name: 'sjdasjk',
- *       })
- *    }
- * }
+ * Helper to remap known queue to factory functions
  */
-export function defineConfig<
-  KnownQueues extends Record<
-    string,
-    {
-      [K in keyof QueueDriverList]: { driver: K } & GetConfig<Parameters<QueueDriverList[K]>>
-    }[keyof QueueDriverList]
-  >,
->(config: { default: keyof KnownQueues; queues: KnownQueues }) {
-  /**
-   * Queues queues should always be provided
-   */
-  if (!config.queues) {
-    throw new Error('Missing "queues" property in queue config')
+type ResolvedConfig<KnownQueues extends Record<string, QueueManagerFactory>> = {
+  default?: keyof KnownQueues
+  queues: {
+    [K in keyof KnownQueues]: KnownQueues[K] extends ConfigProvider<infer A> ? A : KnownQueues[K]
   }
+}
 
-  /**
-   * The default queue should be mentioned in the queues
-   */
-  if (config.default && !config.queues[config.default]) {
-    throw new Error(
-      `Missing "queues.${String(
-        config.default
-      )}" in queue config. It is referenced by the "default" property`
-    )
+/**
+ * Helper function to define config for the queue service
+ */
+export function defineConfig<KnownQueues extends Record<string, QueueManagerFactory>>(config: {
+  default?: keyof KnownQueues
+  queues: {
+    [K in keyof KnownQueues]: ConfigProvider<KnownQueues[K]> | KnownQueues[K]
   }
+}): ConfigProvider<ResolvedConfig<KnownQueues>> {
+  return configProvider.create(async (app) => {
+    const { queues, default: defaultQueue, ...rest } = config
+    const queueNames = Object.keys(queues)
+    const drivers = {} as Record<string, QueueManagerFactory>
 
-  /**
-   * Converting queues config to a collection that queue manager can use
-   */
-  const managerQueues = Object.keys(config.queues).reduce(
-    (result, disk: keyof KnownQueues) => {
-      const queueConfig = config.queues[disk]
-      result[disk] = () => DriversCollection.create(queueConfig.driver, queueConfig)
-      return result
-    },
-    {} as { [K in keyof KnownQueues]: QueueManagerFactory }
-  )
+    for (let queueName of queueNames) {
+      const queue = queues[queueName]
+      if (typeof queue === 'function') {
+        drivers[queueName] = queue
+      } else {
+        drivers[queueName] = await queue.resolver(app)
+      }
+    }
 
-  return {
-    default: config.default,
-    queues: managerQueues,
-  }
+    return {
+      default: defaultQueue,
+      queues: drivers,
+      ...rest,
+    } as ResolvedConfig<KnownQueues>
+  })
+}
+
+/**
+ * Config helpers to create a reference for inbuilt queue drivers
+ */
+export const drivers: {
+  database: (
+    config: DatabaseDriverConfig,
+    database: Database,
+    logger: Logger
+  ) => ConfigProvider<() => DatabaseDriver>
+} = {
+  database(config, database, logger) {
+    return configProvider.create(async () => {
+      const DB = await import('./drivers/database.js')
+      return () => new DB(config, database, logger)
+    })
+  },
 }
