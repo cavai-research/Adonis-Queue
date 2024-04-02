@@ -5,7 +5,7 @@
 /**
  * Queue configuration file, all queue config variables are in here
  */
-import { defineConfig } from '@cavai/adonis-queue/define_config'
+import { defineConfig, drivers } from '@cavai/adonis-queue'
 
 export default defineConfig({
   /**
@@ -14,13 +14,13 @@ export default defineConfig({
   default: '{{queue}}',
 
   queues: {
-    database: {
-      driver: 'database',
+    database: drivers.database({
       /**
        * Table name where jobs are queued, stored and managed
        * Has to be the same as table name in migration file
        */
       tableName: 'adonis_jobs',
+
       /**
        * Delay how often database is polled to check new jobs
        * Smaller delay reduces time between job executions
@@ -28,6 +28,6 @@ export default defineConfig({
        * Delay is in milliseconds
        */
       pollingDelay: 2000,
-    },
+    }),
   },
 })

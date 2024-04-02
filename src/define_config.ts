@@ -1,9 +1,7 @@
 import { configProvider } from '@adonisjs/core'
 import type { ConfigProvider } from '@adonisjs/core/types'
 import { DatabaseDriverConfig, QueueManagerFactory } from './types.js'
-import DatabaseDriver from './drivers/database.js'
-import { Database } from '@adonisjs/lucid/database'
-import { Logger } from '@adonisjs/core/logger'
+import type { DatabaseDriver } from './drivers/database.js'
 
 /**
  * Helper to remap known queue to factory functions
@@ -50,16 +48,16 @@ export function defineConfig<KnownQueues extends Record<string, QueueManagerFact
  * Config helpers to create a reference for inbuilt queue drivers
  */
 export const drivers: {
-  database: (
-    config: DatabaseDriverConfig,
-    database: Database,
-    logger: Logger
-  ) => ConfigProvider<() => DatabaseDriver>
+  database: (config: DatabaseDriverConfig) => ConfigProvider<() => DatabaseDriver>
 } = {
-  database(config, database, logger) {
-    return configProvider.create(async () => {
-      const DB = await import('./drivers/database.js')
-      return () => new DB(config, database, logger)
+  database(config) {
+    return configProvider.create(async (app) => {
+      const { DatabaseDriver } = await import('./drivers/database.js')
+      const logger = await app.container.make('logger')
+      const database = await app.container.make('lucid.db')
+      console.log('DB', DatabaseDriver)
+
+      return () => new DatabaseDriver(config, database, logger)
     })
   },
 }

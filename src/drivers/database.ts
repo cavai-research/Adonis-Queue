@@ -6,7 +6,7 @@ import SuperJSON from 'superjson'
 import { DatabaseDriverConfig, JobRecord, QueueDriver, StoreOptions } from '../types.js'
 import type { Logger } from '@adonisjs/core/logger'
 
-export default class DatabaseDriver implements QueueDriver {
+export class DatabaseDriver implements QueueDriver {
   pollingDelay: number
   /**
    * Get next opens up transaction
