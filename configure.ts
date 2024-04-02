@@ -18,13 +18,14 @@ import { stubsRoot } from './stubs/main.js'
 export async function configure(_command: ConfigureCommand) {
   let mod = await _command.createCodemods()
   // Updating RC file, not actual provider implementation
-  mod.updateRcFile((rcFile) => {
+  await mod.updateRcFile((rcFile) => {
     // Points to exports in package.json
     rcFile.addProvider('@cavai/adonis-queue/queue_provider')
     rcFile.addCommand('@cavai/adonis-queue/commands')
   })
 
   await mod.makeUsingStub(stubsRoot, 'config/queue.stub', { queue: 'database' })
+  await mod.makeUsingStub(stubsRoot, 'migration.stub', {})
 
   // Register / copy metafiles, configs etc
 }
