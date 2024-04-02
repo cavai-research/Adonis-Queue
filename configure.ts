@@ -24,7 +24,7 @@ export async function configure(_command: ConfigureCommand) {
     rcFile.addCommand('@cavai/adonis-queue/commands')
   })
 
-  await mod.makeUsingStub(stubsRoot, 'config/queue.stub', { default: 'database' })
+  await mod.makeUsingStub(stubsRoot, 'config/queue.stub', { queue: 'database' })
 
   // Register / copy metafiles, configs etc
 }
