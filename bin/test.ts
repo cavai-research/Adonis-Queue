@@ -1,8 +1,6 @@
-import { assert } from '@japa/assert'
-import { specReporter } from '@japa/spec-reporter'
-import { runFailedTests } from '@japa/run-failed-tests'
-import { processCliArgs, configure, run } from '@japa/runner'
-import { expectTypeOf } from '@japa/expect-type'
+import { assert } from "@japa/assert";
+import { expectTypeOf } from "@japa/expect-type";
+import { processCLIArgs, configure, run } from "@japa/runner";
 
 /*
 |--------------------------------------------------------------------------
@@ -17,16 +15,11 @@ import { expectTypeOf } from '@japa/expect-type'
 |
 | Please consult japa.dev/runner-config for the config docs.
 */
+processCLIArgs(process.argv.slice(2));
 configure({
-  ...processCliArgs(process.argv.slice(2)),
-  ...{
-    files: ['tests/**/*.spec.ts'],
-    plugins: [assert(), runFailedTests(), expectTypeOf()],
-    reporters: [specReporter()],
-    importer: (filePath) => import(filePath),
-    // forceExit: true,
-  },
-})
+  files: ["tests/**/*.spec.ts"],
+  plugins: [assert(), expectTypeOf()],
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -36,4 +29,4 @@ configure({
 | The following "run" method is required to execute all the tests.
 |
 */
-run()
+run();

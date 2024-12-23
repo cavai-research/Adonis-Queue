@@ -1,0 +1,43 @@
+{{#var modelName = generators.modelName(entity.name)}}
+{{#var modelFileName = generators.modelFileName(entity.name)}}
+{{{
+  exports({
+    to: app.modelsPath(entity.path, modelFileName)
+  })
+}}}
+import { fileURLToPath } from 'node:url'
+import app from '@adonisjs/core/services/app'
+import { BaseJob } from '@cavai/adonis-queue'
+
+export default class {{ filename }} extends BaseJob {
+  /**
+   * Nr of times job is re-tried before it is marked as failed
+   */
+  // static retries = 0
+
+  /**
+   * Delay for retries in seconds, so other jobs get chance to run
+   */
+  // static retryAfter = 5
+
+  /**
+   * Filesystem path to job class
+   */
+  static classPath = app.relativePath(
+    fileURLToPath(new URL('./', import.meta.url))
+  )
+
+  /**
+   * Jobs accept additional payload that can be typed for easier usage
+   */
+  constructor (public payload: { name: string, id: number, signup_date: Date }) {
+    super()
+  }
+
+  /**
+   *  Job handler function, write your own code in here
+   */
+  async handle () {
+    // Code...
+  }
+}

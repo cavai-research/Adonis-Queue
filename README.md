@@ -79,9 +79,9 @@ accordingly if default dynamic one fails to work
 Example job:
 
 ```ts
-import { BaseJob } from '@cavai/adonis-queue'
-import Application from '@ioc:Adonis/Core/Application'
-import { relative } from 'path'
+import { BaseJob } from "@cavai/adonis-queue";
+import Application from "@ioc:Adonis/Core/Application";
+import { relative } from "path";
 
 export default class ExampleJob extends BaseJob {
   /**
@@ -97,13 +97,13 @@ export default class ExampleJob extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  public static classPath = relative(Application.appRoot, __filename)
+  public static classPath = relative(Application.appRoot, __filename);
 
   /**
    * Jobs accept additional payload that can be typed for easier usage
    */
   constructor(public payload: { name: string; id: number; signup_date: Date }) {
-    super()
+    super();
   }
 
   /**
@@ -122,11 +122,15 @@ queue up for execution
 
 ```js
 // First have to import job we want to queue up
-import MailJob from 'App/Jobs/Mails/MailJob'
+import MailJob from "App/Jobs/Mails/MailJob";
 
 // And then dispatch it with optional payload
-const job = await MailJob.dispatch({ name: '123', id: 123, signup_date: new Date() })
-console.log(job) // { id: 7902 }
+const job = await MailJob.dispatch({
+  name: "123",
+  id: 123,
+  signup_date: new Date(),
+});
+console.log(job); // { id: 7902 }
 ```
 
 Awaiting dispatch does **not** wait for execution, it waits for job to be stored
@@ -144,16 +148,16 @@ Job execution can be delayed with `.delay(NOT_BEFORE_TIME)`
 
 ```ts
 // First have to import job we want to queue up
-import MailJob from 'App/Jobs/Mails/MailJob'
+import MailJob from "App/Jobs/Mails/MailJob";
 // Import DateTime from Luxon for easier date management
-import { DateTime } from 'luxon'
+import { DateTime } from "luxon";
 
 // Dispatch job and delay it's execution for one day
-await MailJob.dispatch().delay(DateTime.now().plus({days: 1}))
+await MailJob.dispatch().delay(DateTime.now().plus({ days: 1 }));
 
 // You can also specify date as string
 // This job won't execute before given date
-await MailJob.dispatch().delay('2025-02-24 15:30:00')
+await MailJob.dispatch().delay("2025-02-24 15:30:00");
 ```
 
 ### Start the queue
@@ -186,44 +190,44 @@ This driver needs to extend abstract `QueueDriver` to ensure everything works co
 
 ```ts
 // NeverQueueDriver.ts
-import { QueueDriver } from '@cavai/adonis-queue/build/src/types'
+import { QueueDriver } from "@cavai/adonis-queue/build/src/types";
 
-export class NeverQueueDriver extends QueueDriver{
+export class NeverQueueDriver extends QueueDriver {
   /**
    * Do nothing, NeverQueue will never store any jobs
    */
-  public async store () {
-    console.log('Stored nothing');
+  public async store() {
+    console.log("Stored nothing");
   }
 
   /**
    * Just return null, since there is never going to be job to return
    */
-  public async getNext () {
-    return null
+  public async getNext() {
+    return null;
   }
 
   /**
    * Always return null, since there are no jobs
    */
-  public async getJob () {
-    return null
+  public async getJob() {
+    return null;
   }
 
   /**
    * Keeping on with never having jobs theme
    */
-  public async reSchedule () { }
+  public async reSchedule() {}
 
   /**
    * Do nothing
    */
-  public async markFailed () { }
+  public async markFailed() {}
 
   /**
    * Do nothing
    */
-  public async remove () {}
+  public async remove() {}
 }
 ```
 
@@ -235,23 +239,25 @@ Inside provider `register()` method we are going to register our own driver
 
 ```ts
 // NeverQueueProvider.ts
-import { DriversCollection } from '@cavai/adonis-queue'
-import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import { NeverQueueDriver } from './NeverQueueDriver'
+import { DriversCollection } from "@cavai/adonis-queue";
+import type { ApplicationContract } from "@ioc:Adonis/Core/Application";
+import { NeverQueueDriver } from "./NeverQueueDriver";
 
 export default class NeverQueueProvider {
-  constructor (protected app: ApplicationContract) {}
+  constructor(protected app: ApplicationContract) {}
 
-  public register () {
+  public register() {
     // Register your own bindings
-    DriversCollection.extend('never', () => { // TS error, solution below
-      return new NeverQueueDriver()
-    })
+    DriversCollection.extend("never", () => {
+      // TS error, solution below
+      return new NeverQueueDriver();
+    });
   }
 }
 ```
 
 Even tho our new queue is working now and we can configure it to be used inside `config/queue.ts`, we are going to get some TypeScript errors, about `never` queue not acceptable queue
+
 > Argument of type '"never"' is not assignable to parameter of type '"database"'.ts(2345)
 
 To fix that, need to create TS typings file: `contracts/queue.ts`
@@ -260,12 +266,12 @@ To fix that, need to create TS typings file: `contracts/queue.ts`
 // contracts/queue.ts
 
 // Importing in new queue
-import { NeverQueueDriver } from '@/providers/NeverQueue/NeverQueueDriver'
+import { NeverQueueDriver } from "@/providers/NeverQueue/NeverQueueDriver";
 
-declare module '@cavai/adonis-queue' {
+declare module "@cavai/adonis-queue" {
   export interface QueueDriverList {
-    // Appending it to drivers list and naming it 
-    'never': () => NeverQueueDriver
+    // Appending it to drivers list and naming it
+    never: () => NeverQueueDriver;
   }
 }
 ```

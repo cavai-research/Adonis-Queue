@@ -2,126 +2,82 @@
   "name": "@cavai/adonis-queue",
   "version": "3.0.1",
   "author": "cavai",
-  "description": "> Basic AdonisJS queue provider",
+  "description": "Basic AdonisJS queue provider",
+  "type": "module",
+  "files": [
+    "build/src",
+    "build/providers",
+    "build/services",
+    "build/commands",
+    "build/stubs",
+    "build/configure.*",
+    "build/index.*"
+  ],
+  "main": "build/index.js",
+  "exports": {
+    ".": "./build/index.js",
+    "./services/main": "./build/services/queue.js",
+    "./queue_provider": "./build/providers/queue_provider.js",
+    "./commands": "./build/commands/main.js",
+    "./types": "./build/src/types.js"
+  },
+  "scripts": {
+    "cover": "tsc && nyc --reporter=html --reporter=text npm run test",
+    "clean": "del build",
+    "copyfiles": "copyfiles \"templates/**/*.txt\" build",
+    "pretest": "npm run lint",
+    "test": "c8 -r html npm run quick:test",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "precompile": "npm run lint",
+    "compile": "npm run lint && npm run clean && tsc",
+    "build": "npm run compile && npm run copyfiles",
+    "version": "npm run build",
+    "prepublishOnly": "npm run build",
+    "release": "release-it",
+    "quick:test": "node --import=ts-node-maintained/register/esm --enable-source-maps bin/test.ts"
+  },
+  "devDependencies": {
+    "@adonisjs/assembler": "^7.8.2",
+    "@adonisjs/core": "^6.17.0",
+    "@adonisjs/eslint-config": "^2.0.0-beta.7",
+    "@adonisjs/prettier-config": "^1.4.0",
+    "@adonisjs/tsconfig": "^1.4.0",
+    "@japa/assert": "^4.0.0",
+    "@japa/expect-type": "^2.0.2",
+    "@japa/runner": "^3.1.4",
+    "@swc/core": "^1.10.1",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^22.10.2",
+    "c8": "^10.1.3",
+    "copyfiles": "^2.4.1",
+    "del": "^8.0.0",
+    "del-cli": "^6.0.0",
+    "eslint": "^9.17.0",
+    "luxon": "^3.5.0",
+    "pg": "^8.13.1",
+    "prettier": "^3.4.2",
+    "ts-node-maintained": "^10.9.4",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "Adonis",
+    "AdonisJS",
+    "Adonis V6",
+    "Queue"
+  ],
+  "dependencies": {
+    "@adonisjs/lucid": "^21.5.1",
+    "superjson": "^2.2.2"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cavai-research/Adonis-Queue.git"
   },
   "bugs": {
     "url": "https://github.com/cavai-research/Adonis-Queue/issues"
-  },
-  "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
-  "license": "MIT",
-  "main": "./build/index.js",
-  "typings": "./build/index.d.ts",
-  "scripts": {
-    "mrm": "mrm --preset=@adonisjs/mrm-preset",
-    "lint": "eslint . --ext=.ts",
-    "format": "prettier --write .",
-    "pretest": "npm run lint",
-    "test": "c8 -r html node -r ts-node/register/transpile-only bin/test.ts",
-    "cover": "tsc && nyc --reporter=html --reporter=text npm run test",
-    "clean": "del build",
-    "compile": "npm run lint && npm run clean && tsc",
-    "copyfiles": "copyfiles \"templates/**/*.txt\" build",
-    "build": "npm run compile && npm run copyfiles",
-    "prepublishOnly": "npm run build",
-    "commit": "git-cz",
-    "release": "np --message=\"chore(release): %s\"",
-    "version": "npm run build",
-    "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json Cavai/Adonis-Queue"
-  },
-  "eslintConfig": {
-    "extends": [
-      "plugin:adonis/typescriptPackage",
-      "prettier"
-    ],
-    "plugins": [
-      "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "endOfLine": "auto"
-        }
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "build"
-  ],
-  "prettier": {
-    "trailingComma": "es5",
-    "semi": false,
-    "singleQuote": true,
-    "useTabs": false,
-    "quoteProps": "consistent",
-    "bracketSpacing": true,
-    "arrowParens": "always",
-    "printWidth": 100
-  },
-  "devDependencies": {
-    "@adonisjs/core": "^5.9.0",
-    "@adonisjs/mrm-preset": "^5.0.3",
-    "@adonisjs/sink": "^5.4.2",
-    "@japa/assert": "^1.3.7",
-    "@japa/expect-type": "^1.0.3",
-    "@japa/run-failed-tests": "^1.1.1",
-    "@japa/runner": "^2.2.3",
-    "@japa/spec-reporter": "^1.3.3",
-    "@types/node": "^18.11.9",
-    "adonis-preset-ts": "^2.1.0",
-    "c8": "^7.13.0",
-    "copyfiles": "^2.4.1",
-    "del": "^7.0.0",
-    "del-cli": "^5.0.0",
-    "eslint": "^8.28.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-adonis": "^2.1.1",
-    "eslint-plugin-prettier": "^4.2.1",
-    "pg": "^8.9.0",
-    "prettier": "^2.8.7",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.2"
-  },
-  "keywords": [
-    "Adonis",
-    "AdonisJS",
-    "Adonis V5",
-    "Queue"
-  ],
-  "adonisjs": {
-    "types": "@cavai/adonis-queue",
-    "providers": [
-      "@cavai/adonis-queue"
-    ],
-    "instructions": "./build/instructions.js",
-    "templates": {
-      "config": [
-        {
-          "src": "queue.txt",
-          "dest": "queue"
-        }
-      ]
-    },
-    "commands": [
-      "@cavai/adonis-queue/build/commands"
-    ]
-  },
-  "files": [
-    "build/src",
-    "build/adonis-typings",
-    "build/providers",
-    "build/services",
-    "build/commands",
-    "build/templates",
-    "build/instructions.*",
-    "build/index.*"
-  ],
-  "dependencies": {
-    "@adonisjs/lucid": "^18.3.0",
-    "luxon": "^3.1.1",
-    "superjson": "^1.12.0"
   }
 }

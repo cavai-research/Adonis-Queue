@@ -1,5 +1,5 @@
-import { Dispatcher } from './Dispatcher'
-import { QueueManager } from './QueueManager'
+import { Dispatcher } from "./dispatcher.js";
+import { QueueManager } from "./queue_manager.js";
 
 export class BaseJob {
   constructor(..._: any[]) {}
@@ -7,28 +7,28 @@ export class BaseJob {
   /**
    * Nr of times job is re-tried before it is marked as failed
    */
-  public static retries = 0
+  static retries = 0;
 
   /**
    * Delay for retries in seconds, so other jobs get chance to run
    */
-  public static retryAfter = 5
+  static retryAfter = 5;
 
   /**
    * Filesystem path to job class
    */
-  public static classPath: string
+  static classPath: string;
 
   /**
    * Instance of queue manager
    */
-  public static queueManager: QueueManager<any>
+  static queueManager: QueueManager<any>;
 
   /**
    * Sets queueManager to current job
    */
-  public static useQueue(queueManager) {
-    this.queueManager = queueManager
+  static useQueue(queueManager: QueueManager<any>) {
+    this.queueManager = queueManager;
   }
 
   /**
@@ -36,7 +36,10 @@ export class BaseJob {
    *
    * @param data Data to pass to job class instance
    */
-  public static dispatch<T extends typeof BaseJob>(this: T, ...data: ConstructorParameters<T>) {
-    return new Dispatcher(this, data)
+  static dispatch<T extends typeof BaseJob>(
+    this: T,
+    ...data: ConstructorParameters<T>
+  ) {
+    return new Dispatcher(this, data);
   }
 }
