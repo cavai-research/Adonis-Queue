@@ -1,5 +1,6 @@
-import '@adonisjs/lucid/database_provider'
-import { ApplicationService } from '@adonisjs/core/types'
+/// <reference types="@adonisjs/lucid/database_provider" />
+
+import type { ApplicationService } from '@adonisjs/core/types'
 
 import { BaseJob } from '../src/base_job.js'
 import type { QueueService } from '../src/types.js'

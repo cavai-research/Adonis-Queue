@@ -42,6 +42,7 @@
     "@adonisjs/assembler": "^7.8.2",
     "@adonisjs/core": "^6.17.0",
     "@adonisjs/eslint-config": "^2.0.0-beta.7",
+    "@adonisjs/lucid": "^21.6.0",
     "@adonisjs/prettier-config": "^1.4.0",
     "@adonisjs/tsconfig": "^1.4.0",
     "@japa/assert": "^4.0.0",
@@ -61,16 +62,19 @@
     "ts-node-maintained": "^10.9.4",
     "typescript": "^5.7.2"
   },
+  "dependencies": {
+    "superjson": "^2.2.2"
+  },
+  "peerDependencies": {
+    "@adonisjs/lucid": "^21.0.0",
+    "luxon": "^3.0.0"
+  },
   "keywords": [
     "Adonis",
     "AdonisJS",
     "Adonis V6",
     "Queue"
   ],
-  "dependencies": {
-    "@adonisjs/lucid": "^21.5.1",
-    "superjson": "^2.2.2"
-  },
   "license": "MIT",
   "homepage": "https://github.com/cavai-research/Adonis-Queue#readme",
   "repository": {
