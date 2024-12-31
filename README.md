@@ -79,9 +79,9 @@ accordingly if default dynamic one fails to work
 Example job:
 
 ```ts
-import { fileURLToPath } from "node:url";
-import app from "@adonisjs/core/services/app";
-import { BaseJob } from "@cavai/adonis-queue";
+import { fileURLToPath } from 'node:url'
+import app from '@adonisjs/core/services/app'
+import { BaseJob } from '@cavai/adonis-queue'
 
 export default class ExampleJob extends BaseJob {
   /**
@@ -97,15 +97,13 @@ export default class ExampleJob extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  static classPath = app.relativePath(
-    fileURLToPath(new URL("./", import.meta.url)),
-  );
+  static classPath = app.relativePath(fileURLToPath(new URL('./', import.meta.url)))
 
   /**
    * Jobs accept additional payload that can be typed for easier usage
    */
   constructor(public payload: { name: string; id: number; signup_date: Date }) {
-    super();
+    super()
   }
 
   /**
@@ -124,15 +122,15 @@ queue up for execution
 
 ```js
 // First have to import job we want to queue up
-import MailJob from "#jobs/mail_job";
+import MailJob from '#jobs/mail_job'
 
 // And then dispatch it with optional payload
 const job = await MailJob.dispatch({
-  name: "123",
+  name: '123',
   id: 123,
   signup_date: new Date(),
-});
-console.log(job); // { id: 7902 }
+})
+console.log(job) // { id: 7902 }
 ```
 
 Awaiting dispatch does **not** wait for execution, it waits for job to be stored
@@ -150,16 +148,16 @@ Job execution can be delayed with `.delay(NOT_BEFORE_TIME)`
 
 ```ts
 // First have to import job we want to queue up
-import MailJob from "#jobs/mail_job";
+import MailJob from '#jobs/mail_job'
 // Import DateTime from Luxon for easier date management
-import { DateTime } from "luxon";
+import { DateTime } from 'luxon'
 
 // Dispatch job and delay it's execution for one day
-await MailJob.dispatch().delay(DateTime.now().plus({ days: 1 }));
+await MailJob.dispatch().delay(DateTime.now().plus({ days: 1 }))
 
 // You can also specify date as string
 // This job won't execute before given date
-await MailJob.dispatch().delay("2025-02-24 15:30:00");
+await MailJob.dispatch().delay('2025-02-24 15:30:00')
 ```
 
 ### Start the queue
@@ -192,28 +190,28 @@ This driver needs to extend abstract `QueueDriver` to ensure everything works co
 
 ```ts
 // never_queue/driver.ts
-import { QueueDriver } from "@cavai/adonis-queue/types";
+import { QueueDriver } from '@cavai/adonis-queue/types'
 
 export class NeverQueueDriver extends QueueDriver {
   /**
    * Do nothing, NeverQueue will never store any jobs
    */
   async store() {
-    console.log("Stored nothing");
+    console.log('Stored nothing')
   }
 
   /**
    * Just return null, since there is never going to be job to return
    */
   async getNext() {
-    return null;
+    return null
   }
 
   /**
    * Always return null, since there are no jobs
    */
   async getJob() {
-    return null;
+    return null
   }
 
   /**
@@ -241,19 +239,19 @@ Inside provider `register()` method we are going to register our own driver
 
 ```ts
 // never_queue/queue_provider.ts
-import { DriversCollection } from "@cavai/adonis-queue";
-import { ApplicationService } from "@adonisjs/core/types";
-import { NeverQueueDriver } from "./driver.js";
+import { DriversCollection } from '@cavai/adonis-queue'
+import { ApplicationService } from '@adonisjs/core/types'
+import { NeverQueueDriver } from './driver.js'
 
 export default class NeverQueueProvider {
   constructor(protected app: ApplicationService) {}
 
   register() {
     // Register your own bindings
-    DriversCollection.extend("never", () => {
+    DriversCollection.extend('never', () => {
       // TS error, solution below
-      return new NeverQueueDriver();
-    });
+      return new NeverQueueDriver()
+    })
   }
 }
 ```
@@ -268,12 +266,12 @@ To fix that, need to create TS typings file: `contracts/queue.ts`
 // contracts/queue.ts
 
 // Importing in new queue
-import { NeverQueueDriver } from "#providers/never_queue/driver";
+import { NeverQueueDriver } from '#providers/never_queue/driver'
 
-declare module "@cavai/adonis-queue" {
+declare module '@cavai/adonis-queue' {
   export interface QueueDriverList {
     // Appending it to drivers list and naming it
-    never: () => NeverQueueDriver;
+    never: () => NeverQueueDriver
   }
 }
 ```

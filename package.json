@@ -5,10 +5,10 @@
   "description": "Basic AdonisJS queue provider",
   "type": "module",
   "files": [
-    "build/src",
+    "build/commands",
     "build/providers",
     "build/services",
-    "build/commands",
+    "build/src",
     "build/stubs",
     "build/configure.*",
     "build/index.*"
@@ -24,7 +24,7 @@
   "scripts": {
     "cover": "tsc && nyc --reporter=html --reporter=text npm run test",
     "clean": "del build",
-    "copyfiles": "copyfiles \"templates/**/*.txt\" build",
+    "copyfiles": "copyfiles \"stubs/**/*.stub\" build",
     "pretest": "npm run lint",
     "test": "c8 -r html npm run quick:test",
     "lint": "eslint .",
@@ -79,5 +79,6 @@
   },
   "bugs": {
     "url": "https://github.com/cavai-research/Adonis-Queue/issues"
-  }
+  },
+  "prettier": "@adonisjs/prettier-config"
 }

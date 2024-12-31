@@ -1,25 +1,20 @@
-import { DateTime } from "luxon";
-import SuperJSON from "superjson";
-import type { Database } from "@adonisjs/lucid/database";
-import type { TransactionClientContract } from "@adonisjs/lucid/types/database";
-import type {
-  DatabaseDriverConfig,
-  JobRecord,
-  QueueDriver,
-  StoreOptions,
-} from "../types.js";
+import { DateTime } from 'luxon'
+import SuperJSON from 'superjson'
+import type { Database } from '@adonisjs/lucid/database'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
+import type { DatabaseDriverConfig, JobRecord, QueueDriver, StoreOptions } from '../types.js'
 
 export default class DatabaseDriver implements QueueDriver {
-  #trx?: TransactionClientContract;
-  #database: Database;
-  pollingDelay: number;
+  #trx?: TransactionClientContract
+  #database: Database
+  pollingDelay: number
 
   constructor(
     protected config: DatabaseDriverConfig,
-    database: Database,
+    database: Database
   ) {
-    this.pollingDelay = config.pollingDelay || 2000;
-    this.#database = database;
+    this.pollingDelay = config.pollingDelay || 2000
+    this.#database = database
   }
 
   /**
@@ -31,39 +26,33 @@ export default class DatabaseDriver implements QueueDriver {
       .insert({
         class_path: path,
         payload: SuperJSON.serialize(payload),
-        available_at:
-          options?.availableAt ||
-          DateTime.now().toSQL({ includeOffset: false }),
+        available_at: options?.availableAt || DateTime.now().toSQL({ includeOffset: false }),
       })
-      .returning("id");
+      .returning('id')
 
     return {
       id: job[0].id,
-    };
+    }
   }
 
   /**
    * Get next job from database
    */
   async getNext(): Promise<JobRecord | null> {
-    this.#trx = await this.#database.transaction();
+    this.#trx = await this.#database.transaction()
     const job = await this.#trx
       .from(this.config.tableName)
-      .where(
-        "available_at",
-        "<",
-        DateTime.now().toSQL({ includeOffset: false }),
-      )
+      .where('available_at', '<', DateTime.now().toSQL({ includeOffset: false }))
       .where({ failed: false })
       .forUpdate()
       .skipLocked()
-      .first();
+      .first()
 
     if (!job) {
-      await this.#trx.commit();
+      await this.#trx.commit()
     }
 
-    return job;
+    return job
   }
 
   /**
@@ -72,13 +61,9 @@ export default class DatabaseDriver implements QueueDriver {
   getJob(id: number | string): Promise<JobRecord | null> {
     return this.#database
       .from(this.config.tableName)
-      .where(
-        "available_at",
-        "<",
-        DateTime.now().toSQL({ includeOffset: false }),
-      )
+      .where('available_at', '<', DateTime.now().toSQL({ includeOffset: false }))
       .where({ id: id })
-      .first();
+      .first()
   }
 
   /**
@@ -86,7 +71,7 @@ export default class DatabaseDriver implements QueueDriver {
    */
   async reSchedule(job: JobRecord, retryAfter: number) {
     if (!this.#trx) {
-      throw new Error("Cannot reschedule job without an active transaction");
+      throw new Error('Cannot reschedule job without an active transaction')
     }
 
     await this.#trx
@@ -95,8 +80,8 @@ export default class DatabaseDriver implements QueueDriver {
       .update({
         attempts: job.attempts + 1,
         available_at: DateTime.now().plus({ seconds: retryAfter }),
-      });
-    await this.#trx.commit();
+      })
+    await this.#trx.commit()
   }
 
   /**
@@ -104,16 +89,14 @@ export default class DatabaseDriver implements QueueDriver {
    */
   async markFailed(job: JobRecord) {
     if (!this.#trx) {
-      throw new Error(
-        "Cannot mark job as failed without an active transaction",
-      );
+      throw new Error('Cannot mark job as failed without an active transaction')
     }
 
     await this.#trx.from(this.config.tableName).where({ id: job.id }).update({
       failed: true,
       attempts: job.attempts,
-    });
-    await this.#trx.commit();
+    })
+    await this.#trx.commit()
   }
 
   /**
@@ -121,10 +104,10 @@ export default class DatabaseDriver implements QueueDriver {
    */
   async remove(id: number | string): Promise<void> {
     if (!this.#trx) {
-      throw new Error("Cannot remove job without an active transaction");
+      throw new Error('Cannot remove job without an active transaction')
     }
 
-    await this.#trx.from(this.config.tableName).where({ id: id }).delete();
-    await this.#trx.commit();
+    await this.#trx.from(this.config.tableName).where({ id: id }).delete()
+    await this.#trx.commit()
   }
 }

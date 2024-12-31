@@ -1,7 +1,7 @@
-import DriversCollection from "./drivers_collection.js";
-import type { QueueManagerFactory, QueueDriverList } from "./types.js";
+import DriversCollection from './drivers_collection.js'
+import type { QueueManagerFactory, QueueDriverList } from './types.js'
 
-type GetConfig<T extends any[]> = T extends [] ? {} : T[0];
+type GetConfig<T extends any[]> = T extends [] ? {} : T[0]
 
 /**
  * Define config looks like this
@@ -31,9 +31,7 @@ export function defineConfig<
   KnownQueues extends Record<
     string,
     {
-      [K in keyof QueueDriverList]: { driver: K } & GetConfig<
-        Parameters<QueueDriverList[K]>
-      >;
+      [K in keyof QueueDriverList]: { driver: K } & GetConfig<Parameters<QueueDriverList[K]>>
     }[keyof QueueDriverList]
   >,
 >(config: { default: keyof KnownQueues; queues: KnownQueues }) {
@@ -41,7 +39,7 @@ export function defineConfig<
    * Queues queues should always be provided
    */
   if (!config.queues) {
-    throw new Error('Missing "queues" property in queue config');
+    throw new Error('Missing "queues" property in queue config')
   }
 
   /**
@@ -50,9 +48,9 @@ export function defineConfig<
   if (config.default && !config.queues[config.default]) {
     throw new Error(
       `Missing "queues.${String(
-        config.default,
-      )}" in queue config. It is referenced by the "default" property`,
-    );
+        config.default
+      )}" in queue config. It is referenced by the "default" property`
+    )
   }
 
   /**
@@ -60,16 +58,15 @@ export function defineConfig<
    */
   const managerQueues = Object.keys(config.queues).reduce(
     (result, disk: keyof KnownQueues) => {
-      const queueConfig = config.queues[disk];
-      result[disk] = () =>
-        DriversCollection.create(queueConfig.driver, queueConfig);
-      return result;
+      const queueConfig = config.queues[disk]
+      result[disk] = () => DriversCollection.create(queueConfig.driver, queueConfig)
+      return result
     },
-    {} as { [K in keyof KnownQueues]: QueueManagerFactory },
-  );
+    {} as { [K in keyof KnownQueues]: QueueManagerFactory }
+  )
 
   return {
     default: config.default,
     queues: managerQueues,
-  };
+  }
 }
