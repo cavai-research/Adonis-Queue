@@ -1,19 +1,5 @@
-import DriversCollection from "./src/DriversCollection";
-import { QueueManager } from "./src/QueueManager";
-
-declare module "@ioc:Adonis/Core/Application" {
-  export interface ContainerBindings {
-    "Cavai/Adonis-Queue": QueueManager<any>;
-  }
-}
-
-export { QueueManager };
-export { BaseJob } from "./src/BaseJob";
-export { defineConfig } from "./src/DefineConfig";
-export { Dispatcher } from "./src/Dispatcher";
-export { DriversCollection };
-
-export * from "./src/types";
-
-import QueueProvider from "./providers/QueueProvider";
-export default QueueProvider;
+export { BaseJob } from "./src/base_job.js";
+export { QueueManager } from "./src/queue_manager.js";
+export { defineConfig } from "./src/define_config.js";
+export { Dispatcher } from "./src/dispatcher.js";
+export { default as DriversCollection } from "./src/drivers_collection.js";
