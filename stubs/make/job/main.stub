@@ -1,15 +1,15 @@
-{{#var modelName = generators.modelName(entity.name)}}
-{{#var modelFileName = generators.modelFileName(entity.name)}}
+{{#var jobName = string(entity.name).removeExtension().removeSuffix('job').singular().pascalCase().suffix('Job').toString() }}
+{{#var jobFileName = string(jobName).snakeCase().ext('.ts').toString() }}
 {{{
   exports({
-    to: app.modelsPath(entity.path, modelFileName)
+    to: app.makePath('app/jobs', entity.path, jobFileName)
   })
 }}}
 import { fileURLToPath } from 'node:url'
 import app from '@adonisjs/core/services/app'
 import { BaseJob } from '@cavai/adonis-queue'
 
-export default class {{ filename }} extends BaseJob {
+export default class {{ jobName }} extends BaseJob {
   /**
    * Nr of times job is re-tried before it is marked as failed
    */
@@ -23,21 +23,19 @@ export default class {{ filename }} extends BaseJob {
   /**
    * Filesystem path to job class
    */
-  static classPath = app.relativePath(
-    fileURLToPath(new URL('./', import.meta.url))
-  )
+  static classPath = app.relativePath(fileURLToPath(new URL(import.meta.url)))
 
   /**
    * Jobs accept additional payload that can be typed for easier usage
    */
-  constructor (public payload: { name: string, id: number, signup_date: Date }) {
+  constructor(public payload: { name: string, id: number, signup_date: Date }) {
     super()
   }
 
   /**
    *  Job handler function, write your own code in here
    */
-  async handle () {
+  async handle() {
     // Code...
   }
 }

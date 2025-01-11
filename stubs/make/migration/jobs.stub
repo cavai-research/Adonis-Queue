@@ -1,9 +1,14 @@
-import BaseSchema from '@ioc:Adonis/Lucid/Schema'
+{{{
+  exports({
+    to: app.makePath(migration.folder, entity.path, migration.fileName)
+  })
+}}}
+import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class AdonisJobs extends BaseSchema {
   protected tableName = 'adonis_jobs'
 
-  public async up () {
+  async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.bigIncrements('id').unsigned()
       table.string('class_path').notNullable()
@@ -17,7 +22,7 @@ export default class AdonisJobs extends BaseSchema {
     })
   }
 
-  public async down () {
+  async down() {
     this.schema.dropTable(this.tableName)
   }
 }

@@ -29,6 +29,6 @@ test.group('QueueManager', () => {
     )
 
     // Test types
-    expectTypeOf(queueManager.use).parameter(0).toEqualTypeOf<'db'>()
+    expectTypeOf(queueManager.use).parameter(0).toEqualTypeOf<'db' | undefined>()
   })
 })

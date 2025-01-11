@@ -2,7 +2,7 @@ import { BaseCommand, args } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
 
 export default class StartQueue extends BaseCommand {
-  static settings: CommandOptions = {
+  static options: CommandOptions = {
     staysAlive: true,
     startApp: true,
   }

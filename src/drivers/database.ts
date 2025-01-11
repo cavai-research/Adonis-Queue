@@ -50,6 +50,7 @@ export default class DatabaseDriver implements QueueDriver {
 
     if (!job) {
       await this.#trx.commit()
+      return null
     }
 
     return job

@@ -1,3 +1,4 @@
+import { join } from 'node:path'
 import SuperJSON from 'superjson'
 import type { Logger } from '@adonisjs/core/logger'
 import type { QueueManagerFactory, QueueDriver, StoreOptions } from './types.js'
@@ -15,22 +16,26 @@ import type { QueueManagerFactory, QueueDriver, StoreOptions } from './types.js'
  * }
  */
 export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> {
-  protected driver: QueueDriver
+  #cachedDrivers: Partial<Record<keyof Mappings, QueueDriver>> = {}
 
   constructor(
     protected config: { default: keyof Mappings; queues: Mappings },
     protected logger: Logger,
     protected jobsRoot: string
-  ) {
-    // Setup default driver
-    this.driver = this.use(config.default)
-  }
+  ) {}
 
-  use<K extends keyof Mappings>(queue: K): QueueDriver {
-    if (!this.config.queues[queue]) {
-      throw Error(`Queue not defined: "${String(queue)}"`)
+  use<K extends keyof Mappings>(queue?: K): QueueDriver {
+    const queueToUse = queue ?? this.config.default
+    if (this.#cachedDrivers[queueToUse]) {
+      return this.#cachedDrivers[queueToUse]
     }
-    return this.config.queues[queue]()
+
+    if (!this.config.queues[queueToUse]) {
+      throw Error(`Queue not defined: "${String(queueToUse)}"`)
+    }
+
+    this.#cachedDrivers[queueToUse] = this.config.queues[queueToUse]()
+    return this.#cachedDrivers[queueToUse]
   }
 
   /**
@@ -68,13 +73,14 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
    * Executes next job in queue
    */
   async execute() {
-    let job = await this.driver.getNext()
+    let job = await this.use().getNext()
 
     // No job queued, continue with life
     if (!job) {
-      this.logger.debug('Jon jobs in queue')
+      this.logger.debug('No jobs in queue')
       return
     }
+
     this.logger.debug({ job }, 'Execution started')
 
     /**
@@ -83,8 +89,8 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
      * so queue has to be restarted if there has been
      * any change to already imported job class
      */
-    let payload: any = SuperJSON.parse(job.payload)
-    let jobPath = `${this.jobsRoot}/${job.class_path}`
+    const payload: any = SuperJSON.parse(job.payload)
+    const jobPath = join(this.jobsRoot, job.class_path)
     const jobExports = await import(jobPath)
     const JobClass = jobExports.default
     const jobClassInstance = new JobClass(...payload.data)
@@ -99,7 +105,7 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
       await jobClassInstance.handle()
 
       // After execution remove job from queue
-      await this.driver.remove(job.id)
+      await this.use().remove(job.id)
     } catch (error) {
       this.logger.error(error, 'Job execution failed')
 
@@ -109,11 +115,11 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
        */
       if (job.attempts >= JobClass.retries) {
         this.logger.error(`Job ${job.id} failed for last time after ${JobClass.retries} retries`)
-        await this.driver.markFailed(job)
+        await this.use().markFailed(job)
         return
       }
 
-      await this.driver.reSchedule(job, JobClass.retryAfter)
+      await this.use().reSchedule(job, JobClass.retryAfter)
     }
     this.logger.debug({ job }, 'Executed successfully')
   }
@@ -126,6 +132,6 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
    * @param options Store options
    */
   async store(path: string, payload: any, options?: StoreOptions) {
-    return this.driver.store(path, payload, options)
+    return this.use().store(path, payload, options)
   }
 }
