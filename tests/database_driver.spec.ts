@@ -1,13 +1,13 @@
 import { test } from '@japa/runner'
 import SuperJSON from 'superjson'
-import DatabaseDriver from '../src/Drivers/Database'
-import { createDatabase, setup, sleep } from '../test-helpers'
+import DatabaseDriver from '../src/drivers/database.js'
+import { createDatabase, setup, sleep } from '../test-helpers/index.js'
 
-test.group('Database driver', (group) => {
-  group.each.setup(setup)
-
-  test('Create instance of driver', async ({ assert }) => {
+test.group('Database driver', () => {
+  test('Create instance of driver', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -24,8 +24,10 @@ test.group('Database driver', (group) => {
     assert.exists(driver.markFailed)
   })
 
-  test('Store job', async ({ assert, expectTypeOf }) => {
+  test('Store job', async ({ assert, expectTypeOf, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -46,13 +48,13 @@ test.group('Database driver', (group) => {
       failed: false,
     })
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
     await db.manager.closeAll()
   })
 
-  test('Get next job', async ({ assert }) => {
+  test('Get next job', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -73,13 +75,13 @@ test.group('Database driver', (group) => {
       failed: false,
     })
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
+    await driver.remove(job!.id)
   })
 
-  test('Payload serialization is OK', async ({ assert }) => {
+  test('Payload serialization is OK', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -93,21 +95,21 @@ test.group('Database driver', (group) => {
       foo: 'bar',
       randomPayload,
     })
+
     let nextJob = await driver.getNext()
+    await driver.remove(nextJob!.id)
 
     const payload = SuperJSON.parse(nextJob!.payload)
     assert.deepEqual(payload, {
       foo: 'bar',
       randomPayload,
     })
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
   })
 
-  test('Get job by ID', async ({ assert }) => {
+  test('Get job by ID', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -123,13 +125,13 @@ test.group('Database driver', (group) => {
     assert.isNotNull(job)
     assert.isNotNull(job!.id)
 
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
+    await driver.remove(nextJob!.id)
   })
 
-  test('Re schedule job', async ({ assert }) => {
+  test('Re schedule job', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -142,22 +144,20 @@ test.group('Database driver', (group) => {
     let nextJob = await driver.getNext()
 
     assert.equal(nextJob!.attempts, 0)
-
     await driver.reSchedule(nextJob!, 2)
 
     await sleep(3)
 
     const reScheduled = await driver.getNext()
+    await driver.remove(reScheduled!.id)
     assert.isNotNull(reScheduled)
     assert.equal(reScheduled!.attempts, 1)
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
   }).timeout(5000)
 
-  test('Mark job as failed', async ({ assert }) => {
+  test('Mark job as failed', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -170,21 +170,18 @@ test.group('Database driver', (group) => {
     let nextJob = await driver.getNext()
 
     assert.isFalse(nextJob!.failed)
-
     await driver.markFailed(nextJob!)
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNotNull(job)
     assert.isNotNull(job!.id)
     assert.isTrue(job!.failed)
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
   })
 
-  test('Delete job', async ({ assert }) => {
+  test('Delete job', async ({ assert, cleanup }) => {
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -202,9 +199,5 @@ test.group('Database driver', (group) => {
 
     const job = await driver.getJob(nextJob!.id)
     assert.isNull(job)
-
-    // Test doesn't finish without manual close
-    // Group level close doesn't work, coz that's another instance
-    await db.manager.closeAll()
   })
 })

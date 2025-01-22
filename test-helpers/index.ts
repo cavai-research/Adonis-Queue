@@ -1,12 +1,12 @@
-import { Database } from '@adonisjs/lucid/build/src/Database'
-import { Logger } from '@adonisjs/logger/build'
-import { Profiler } from '@adonisjs/profiler/build'
-import { Emitter } from '@adonisjs/events/build/standalone'
+import { Logger } from '@adonisjs/core/logger'
+import { Database } from '@adonisjs/lucid/database'
+import { AppFactory } from '@adonisjs/core/factories/app'
+import { EmitterFactory } from '@adonisjs/core/factories/events'
 
 export function createDatabase() {
+  const app = new AppFactory().create(new URL('./', import.meta.url))
+  const emitter = new EmitterFactory().create(app)
   const logger = createLogger()
-  const profiler = new Profiler(process.cwd(), logger, {})
-  const emitter = new Emitter()
   const db = new Database(
     {
       connection: 'pg',
@@ -15,15 +15,14 @@ export function createDatabase() {
           client: 'pg',
           connection: {
             host: 'localhost',
-            user: 'queue_test',
-            password: 'queue_test',
+            user: 'postgres',
+            password: '',
             database: 'queue_test',
           },
         },
       },
     },
     logger,
-    profiler,
     emitter
   )
 
@@ -38,10 +37,7 @@ export function createLogger() {
   })
 }
 
-export async function setup() {
-  // Create DB
-  const db = await createDatabase()
-
+export async function setup(db: Database) {
   await db.connection().schema.createTable('jobs', (table) => {
     table.bigIncrements('id').unsigned()
     table.string('class_path').notNullable()
@@ -55,7 +51,6 @@ export async function setup() {
   })
 
   return async () => {
-    // Teardown DB
     await db.connection().schema.dropTable('jobs')
     await db.manager.closeAll()
   }

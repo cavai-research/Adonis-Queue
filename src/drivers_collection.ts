@@ -1,15 +1,15 @@
 // Check up stuff from https://github.com/adonisjs/core/blob/next/modules/hash/drivers_collection.ts
 
-import { QueueDriverList } from './types'
+import type { QueueDriverList } from './types.js'
 
 /**
  * A singleton collection of drivers for the entire lifecycle of
  * the application.
  */
 class DriversCollection {
-  public list: Partial<QueueDriverList> = {}
+  list: Partial<QueueDriverList> = {}
 
-  public extend<Name extends keyof QueueDriverList>(
+  extend<Name extends keyof QueueDriverList>(
     driverName: Name,
     factoryCallback: QueueDriverList[Name]
   ) {
@@ -17,7 +17,7 @@ class DriversCollection {
     return this
   }
 
-  public create<Name extends keyof QueueDriverList>(
+  create<Name extends keyof QueueDriverList>(
     name: Name,
     config: Parameters<QueueDriverList[Name]>[0]
   ) {

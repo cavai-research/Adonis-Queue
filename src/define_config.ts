@@ -1,5 +1,5 @@
-import { QueueManagerFactory, QueueDriverList } from './types'
-import DriversCollection from './DriversCollection'
+import DriversCollection from './drivers_collection.js'
+import type { QueueManagerFactory, QueueDriverList } from './types.js'
 
 type GetConfig<T extends any[]> = T extends [] ? {} : T[0]
 
@@ -33,7 +33,7 @@ export function defineConfig<
     {
       [K in keyof QueueDriverList]: { driver: K } & GetConfig<Parameters<QueueDriverList[K]>>
     }[keyof QueueDriverList]
-  >
+  >,
 >(config: { default: keyof KnownQueues; queues: KnownQueues }) {
   /**
    * Queues queues should always be provided
@@ -56,11 +56,14 @@ export function defineConfig<
   /**
    * Converting queues config to a collection that queue manager can use
    */
-  const managerQueues = Object.keys(config.queues).reduce((result, disk: keyof KnownQueues) => {
-    const queueConfig = config.queues[disk]
-    result[disk] = () => DriversCollection.create(queueConfig.driver, queueConfig)
-    return result
-  }, {} as { [K in keyof KnownQueues]: QueueManagerFactory })
+  const managerQueues = Object.keys(config.queues).reduce(
+    (result, disk: keyof KnownQueues) => {
+      const queueConfig = config.queues[disk]
+      result[disk] = () => DriversCollection.create(queueConfig.driver, queueConfig)
+      return result
+    },
+    {} as { [K in keyof KnownQueues]: QueueManagerFactory }
+  )
 
   return {
     default: config.default,

@@ -1,14 +1,14 @@
 import { test } from '@japa/runner'
-import DatabaseDriver from '../src/Drivers/Database'
-import { QueueManager } from '../src/QueueManager'
-import { createDatabase, createLogger, setup } from '../test-helpers'
+import DatabaseDriver from '../src/drivers/database.js'
+import { QueueManager } from '../src/queue_manager.js'
+import { createDatabase, createLogger, setup } from '../test-helpers/index.js'
 
-test.group('QueueManager', (group) => {
-  group.each.setup(setup)
-
-  test('Create instance of QueueManager', async ({ expectTypeOf }) => {
+test.group('QueueManager', () => {
+  test('Create instance of QueueManager', async ({ expectTypeOf, cleanup }) => {
     // Test logic goes here
     const db = createDatabase()
+    cleanup(await setup(db))
+
     const driver = new DatabaseDriver(
       {
         tableName: 'jobs',
@@ -29,6 +29,6 @@ test.group('QueueManager', (group) => {
     )
 
     // Test types
-    expectTypeOf(queueManager.use).parameter(0).toEqualTypeOf<'db'>()
+    expectTypeOf(queueManager.use).parameter(0).toEqualTypeOf<'db' | undefined>()
   })
 })

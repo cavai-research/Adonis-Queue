@@ -28,8 +28,8 @@ failure tracking and delaying job execution
 ## Installation
 
 - Install package `npm install @cavai/adonis-queue`
-- Generate base files `node ace invoke @cavai/adonis-queue`
-  - app/Jobs/ExampleJob.ts
+- Generate base files `node ace configure @cavai/adonis-queue`
+  - app/jobs/example_job.ts
   - config/queue.ts
   - database/migrations/TIMESTAMP_adonis_queue.ts
 - Run database migrations `node ace migration:run`
@@ -48,7 +48,7 @@ Jobs have multiple configurable parameters
 - `retryAfter` - Delay for retries in seconds, so other jobs get chance to run,
   `defaults to 5` sec
 - `classPath` - Filesystem path to job class, defaults to
-  `path.relative(Application.appRoot, __filename)`
+  `app.relativePath(fileURLToPath(new URL('./', import.meta.url)))`
 
 ### Driver - database
 
@@ -79,25 +79,25 @@ accordingly if default dynamic one fails to work
 Example job:
 
 ```ts
+import { fileURLToPath } from 'node:url'
+import app from '@adonisjs/core/services/app'
 import { BaseJob } from '@cavai/adonis-queue'
-import Application from '@ioc:Adonis/Core/Application'
-import { relative } from 'path'
 
 export default class ExampleJob extends BaseJob {
   /**
    * Nr of times job is re-tried before it is marked as failed
    */
-  // public static retries = 0
+  // static retries = 0
 
   /**
    * Delay for retries in seconds, so other jobs get chance to run
    */
-  // public static retryAfter = 5
+  // static retryAfter = 5
 
   /**
    * Filesystem path to job class
    */
-  public static classPath = relative(Application.appRoot, __filename)
+  static classPath = app.relativePath(fileURLToPath(new URL('./', import.meta.url)))
 
   /**
    * Jobs accept additional payload that can be typed for easier usage
@@ -109,7 +109,7 @@ export default class ExampleJob extends BaseJob {
   /**
    *  Job handler function, write your own code in here
    */
-  public async handle() {
+  async handle() {
     // Code...
   }
 }
@@ -122,10 +122,14 @@ queue up for execution
 
 ```js
 // First have to import job we want to queue up
-import MailJob from 'App/Jobs/Mails/MailJob'
+import MailJob from '#jobs/mail_job'
 
 // And then dispatch it with optional payload
-const job = await MailJob.dispatch({ name: '123', id: 123, signup_date: new Date() })
+const job = await MailJob.dispatch({
+  name: '123',
+  id: 123,
+  signup_date: new Date(),
+})
 console.log(job) // { id: 7902 }
 ```
 
@@ -144,12 +148,12 @@ Job execution can be delayed with `.delay(NOT_BEFORE_TIME)`
 
 ```ts
 // First have to import job we want to queue up
-import MailJob from 'App/Jobs/Mails/MailJob'
+import MailJob from '#jobs/mail_job'
 // Import DateTime from Luxon for easier date management
 import { DateTime } from 'luxon'
 
 // Dispatch job and delay it's execution for one day
-await MailJob.dispatch().delay(DateTime.now().plus({days: 1}))
+await MailJob.dispatch().delay(DateTime.now().plus({ days: 1 }))
 
 // You can also specify date as string
 // This job won't execute before given date
@@ -180,71 +184,72 @@ multiple runners picking up same job
 Let's say we want to have driver for testing that never runs jobs,
 just deletes them as soon as they are dispatched
 
-First off, need to create new queue driver, for that let's create `providers/NeverQueue/NeverQueueDriver.ts`
+First off, need to create new queue driver, for that let's create `providers/never_queue/driver.ts`
 
 This driver needs to extend abstract `QueueDriver` to ensure everything works correctly
 
 ```ts
-// NeverQueueDriver.ts
-import { QueueDriver } from '@cavai/adonis-queue/build/src/types'
+// never_queue/driver.ts
+import { QueueDriver } from '@cavai/adonis-queue/types'
 
-export class NeverQueueDriver extends QueueDriver{
+export class NeverQueueDriver extends QueueDriver {
   /**
    * Do nothing, NeverQueue will never store any jobs
    */
-  public async store () {
-    console.log('Stored nothing');
+  async store() {
+    console.log('Stored nothing')
   }
 
   /**
    * Just return null, since there is never going to be job to return
    */
-  public async getNext () {
+  async getNext() {
     return null
   }
 
   /**
    * Always return null, since there are no jobs
    */
-  public async getJob () {
+  async getJob() {
     return null
   }
 
   /**
    * Keeping on with never having jobs theme
    */
-  public async reSchedule () { }
+  async reSchedule() {}
 
   /**
    * Do nothing
    */
-  public async markFailed () { }
+  async markFailed() {}
 
   /**
    * Do nothing
    */
-  public async remove () {}
+  async remove() {}
 }
 ```
 
 Now also need to make provider, that loads in this new driver
 
-`node ace make:provider NeverQueue/NeverQueueProvider`
+`node ace make:provider never_queue/queue_provider`
 
 Inside provider `register()` method we are going to register our own driver
 
 ```ts
-// NeverQueueProvider.ts
+// never_queue/queue_provider.ts
 import { DriversCollection } from '@cavai/adonis-queue'
-import type { ApplicationContract } from '@ioc:Adonis/Core/Application'
-import { NeverQueueDriver } from './NeverQueueDriver'
+import { ApplicationService } from '@adonisjs/core/types'
+import { NeverQueueDriver } from './driver.js'
 
 export default class NeverQueueProvider {
-  constructor (protected app: ApplicationContract) {}
+  constructor(protected app: ApplicationService) {}
 
-  public register () {
+  register() {
     // Register your own bindings
-    DriversCollection.extend('never', () => { // TS error, solution below
+    DriversCollection.extend('never', () => {
+      // TS error, solution below
       return new NeverQueueDriver()
     })
   }
@@ -252,6 +257,7 @@ export default class NeverQueueProvider {
 ```
 
 Even tho our new queue is working now and we can configure it to be used inside `config/queue.ts`, we are going to get some TypeScript errors, about `never` queue not acceptable queue
+
 > Argument of type '"never"' is not assignable to parameter of type '"database"'.ts(2345)
 
 To fix that, need to create TS typings file: `contracts/queue.ts`
@@ -260,12 +266,12 @@ To fix that, need to create TS typings file: `contracts/queue.ts`
 // contracts/queue.ts
 
 // Importing in new queue
-import { NeverQueueDriver } from '@/providers/NeverQueue/NeverQueueDriver'
+import { NeverQueueDriver } from '#providers/never_queue/driver'
 
 declare module '@cavai/adonis-queue' {
   export interface QueueDriverList {
-    // Appending it to drivers list and naming it 
-    'never': () => NeverQueueDriver
+    // Appending it to drivers list and naming it
+    never: () => NeverQueueDriver
   }
 }
 ```
