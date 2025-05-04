@@ -9,6 +9,7 @@ type GetConfig<T extends any[]> = T extends [] ? {} : T[0]
  * I will take this
  * {
  *    default: 'somename',
+ *    logLevel: 'info',
  *    queues: {
  *       somename: {
  *         driver: 'db',
@@ -20,6 +21,7 @@ type GetConfig<T extends any[]> = T extends [] ? {} : T[0]
  * And return this
  * {
  *    default: 'somename',
+ *    logLevel: 'info',
  *    queues: {
  *       somename: () => new DatabaseDrive({
  *          table_name: 'sjdasjk',
@@ -64,6 +66,7 @@ export function defineConfig<
 
   return {
     default: config.default,
+    logLevel: config.logLevel,
     queues: managerQueues,
   }
 }
