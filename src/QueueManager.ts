@@ -23,7 +23,8 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
     protected jobsRoot: string
   ) {
     // Setup default driver
-    this.driver = this.use(config.default)
+    this.driver = this.use(config.default);
+    this.logger.level = config.logLevel || Logger.level;
   }
 
   public use<K extends keyof Mappings>(queue: K): QueueDriver {
