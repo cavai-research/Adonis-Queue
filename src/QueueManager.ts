@@ -73,7 +73,7 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
 
     // No job queued, continue with life
     if (!job) {
-      this.logger.debug('Jon jobs in queue')
+      this.logger.debug('No jobs in queue')
       return
     }
     this.logger.debug({ job }, 'Execution started')
