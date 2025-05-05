@@ -20,6 +20,7 @@ test.group('QueueManager', (group) => {
     const queueManager = new QueueManager(
       {
         default: 'db',
+        logLevel: 'debug',
         queues: {
           db: () => driver,
         },
