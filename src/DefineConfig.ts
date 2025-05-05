@@ -36,7 +36,7 @@ export function defineConfig<
       [K in keyof QueueDriverList]: { driver: K } & GetConfig<Parameters<QueueDriverList[K]>>
     }[keyof QueueDriverList]
   >
->(config: { default: keyof KnownQueues; queues: KnownQueues }) {
+>(config: { default: keyof KnownQueues; queues: KnownQueues; logLevel?: string }) {
   /**
    * Queues queues should always be provided
    */

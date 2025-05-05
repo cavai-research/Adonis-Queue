@@ -18,13 +18,13 @@ export class QueueManager<Mappings extends Record<string, QueueManagerFactory>> 
   protected driver: QueueDriver
 
   constructor(
-    protected config: { default: keyof Mappings; queues: Mappings },
+    protected config: { default: keyof Mappings; queues: Mappings; logLevel?: string },
     protected logger: LoggerContract,
     protected jobsRoot: string
   ) {
     // Setup default driver
-    this.driver = this.use(config.default);
-    this.logger.level = config.logLevel || Logger.level;
+    this.driver = this.use(config.default)
+    this.logger.level = config.logLevel || logger.level
   }
 
   public use<K extends keyof Mappings>(queue: K): QueueDriver {
