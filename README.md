@@ -1,6 +1,6 @@
 # Adonis Queue
 
-> Queue for AdonisJS 5
+> Queue for AdonisJS 6
 
 NPM: https://www.npmjs.com/package/@cavai/adonis-queue
 
